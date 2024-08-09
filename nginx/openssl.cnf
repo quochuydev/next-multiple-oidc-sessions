@@ -1,0 +1,18 @@
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+req_extensions      = SAN
+extensions          = SAN
+[ req_distinguished_name ]
+countryName         = VN
+stateOrProvinceName = HCM
+localityName        = HCM
+organizationName    = Company
+[SAN]
+subjectAltName      = @alt_names
+extendedKeyUsage    = serverAuth
+basicConstraints=CA:TRUE,pathlen:0
+[alt_names]
+DNS.1 = auth.example.local
+DNS.2 = app1.example.local
+DNS.3 = app2.example.local

@@ -3,6 +3,14 @@
 version: "3"
 
 tasks:
+  up:
+    desc: Run docker-compose
+    cmds:
+      - docker-compose up -d
+  down:
+    desc: Stop docker-compose
+    cmds:
+      - docker-compose down
   dev:
     desc: Run all apps in dev mode
     deps:
@@ -10,17 +18,14 @@ tasks:
       - app1
       - app2
   auth:
-    desc: Run the auth app in dev mode
     dir: auth
     cmds:
       - yarn dev
   app1:
-    desc: Run the app1 app in dev mode
     dir: app1
     cmds:
       - yarn dev
   app2:
-    desc: Run the app2 app in dev mode
     dir: app2
     cmds:
       - yarn dev
