@@ -17,7 +17,7 @@ export function setCookie(
     httpOnly: true,
     secure: false, // TODO: set to true
     maxAge: 30 * 24 * 60 * 60, // 30d
-    domain: new URL(configuration.appUrl).hostname,
+    domain: "example.local",
   };
 
   requestCookie.set({
