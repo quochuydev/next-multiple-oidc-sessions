@@ -16,7 +16,7 @@ tasks:
     deps:
       - auth
       - app1
-      - app2
+      # - app2
   auth:
     dir: auth
     cmds:

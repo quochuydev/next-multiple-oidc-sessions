@@ -14,6 +14,7 @@ if (process.env.ENV_PATH) {
 }
 
 const schema = z.object({
+  appUrl: z.string(),
   zitadel: z.object({
     url: z.string(),
   }),
@@ -25,13 +26,15 @@ const schema = z.object({
 });
 
 const configuration = {
+  appUrl: "https://auth.example.local",
   zitadel: {
     url: "https://system-v1-fpms4l.zitadel.cloud",
   },
   portal: {
     clientId: "279716137237868517",
-    issuer: "https://zitadel-login-ui-v2.vercel.app",
-    redirectUrl: "https://auth.example.local/callback",
+    // issuer: "https://zitadel-login-ui-v2.vercel.app",
+    issuer: "https://system-v1-fpms4l.zitadel.cloud",
+    redirectUrl: "https://auth.example.local/api/callback",
   },
 };
 
