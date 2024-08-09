@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  dev:
+    desc: Run all apps in dev mode
+    deps:
+      - portal
+      - app1
+      - app2
+  portal:
+    desc: Run the portal app in dev mode
+    dir: portal
+    cmds:
+      - yarn dev
+  app1:
+    desc: Run the app1 app in dev mode
+    dir: app1
+    cmds:
+      - yarn dev
+  app2:
+    desc: Run the app2 app in dev mode
+    dir: app2
+    cmds:
+      - yarn dev

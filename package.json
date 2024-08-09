@@ -1,0 +1,14 @@
+{
+  "name": "next-auth-multiple-sessions",
+  "private": "true",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/quochuydev/next-auth-multiple-sessions.git",
+  "author": "quochuydev <quochuy.dev@gmail.com>",
+  "license": "MIT",
+  "workspaces": [
+    "portal",
+    "app1",
+    "app2"
+  ]
+}
