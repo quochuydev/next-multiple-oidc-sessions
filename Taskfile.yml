@@ -6,12 +6,12 @@ tasks:
   dev:
     desc: Run all apps in dev mode
     deps:
-      - portal
+      - auth
       - app1
       - app2
-  portal:
-    desc: Run the portal app in dev mode
-    dir: portal
+  auth:
+    desc: Run the auth app in dev mode
+    dir: auth
     cmds:
       - yarn dev
   app1:

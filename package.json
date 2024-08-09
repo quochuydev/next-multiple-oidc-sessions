@@ -7,7 +7,7 @@
   "author": "quochuydev <quochuy.dev@gmail.com>",
   "license": "MIT",
   "workspaces": [
-    "portal",
+    "auth",
     "app1",
     "app2"
   ]
