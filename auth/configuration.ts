@@ -20,9 +20,6 @@ const schema = z.object({
     httpOnly: z.boolean(),
     secure: z.boolean(),
   }),
-  zitadel: z.object({
-    url: z.string(),
-  }),
   portal: z.object({
     clientId: z.string(),
     issuer: z.string(),
@@ -37,13 +34,10 @@ const configuration = {
     httpOnly: true,
     secure: false,
   },
-  zitadel: {
-    url: "https://system-v1-fpms4l.zitadel.cloud",
-  },
   portal: {
-    clientId: "279716137237868517",
     // issuer: "https://zitadel-login-ui-v2.vercel.app",
     issuer: "https://system-v1-fpms4l.zitadel.cloud",
+    clientId: "279716137237868517",
     redirectUrl: "https://auth.example.local/api/callback",
   },
 };

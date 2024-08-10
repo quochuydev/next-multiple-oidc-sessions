@@ -8,7 +8,7 @@ Loading...
 
 ...Forever.
 
----
+## Commands
 
 ### Pre-Dev 🙌
 
@@ -36,6 +36,14 @@ yarn install
 echo "127.0.0.1 app.example.local auth.example.local" | sudo tee -a /etc/hosts > /dev/null
 ```
 
+#### Generate New SSL certificates (Optional)
+
+```sh
+cd nginx
+
+./openssl.sh
+```
+
 #### Trust the certificates (MacOS)
 
 ```sh
@@ -54,10 +62,12 @@ task up
 
 `task dev`
 
-### Generate New SSL certificates
+## Flows
 
-```sh
-cd nginx
+https://app.example.local/app1
 
-./openssl.sh
-```
+https://app.example.local/app2
+
+https://auth.example.local
+
+https://zitadel-login-ui-v2.vercel.app

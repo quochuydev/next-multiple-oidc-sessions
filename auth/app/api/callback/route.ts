@@ -1,6 +1,10 @@
 import configuration from "@/configuration";
-import { codeVerifier } from "@/lib/bytes";
-import { returnUrlCookieName, sessionCookieName } from "@/lib/constant";
+import {
+  codeVerifierCookieName,
+  returnUrlCookieName,
+  sessionCookieName,
+  stateCookieName,
+} from "@/lib/constant";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
@@ -9,28 +13,37 @@ import { URLSearchParams } from "url";
 import { v4 as uuid } from "uuid";
 
 async function handler(request: NextRequest) {
-  const code = request.nextUrl.searchParams.get("code");
-  const state = request.nextUrl.searchParams.get("state");
-
-  const requestCookie = cookies();
-  const sessionCookie = requestCookie.get(sessionCookieName);
-  const returnUrlCookie = requestCookie.get(returnUrlCookieName);
-
-  console.log(`debug:code`, code);
-  console.log(`debug:state`, state);
-  console.log(`debug:sessionId`, sessionCookie?.value);
-  console.log(`debug:returnUrl`, returnUrlCookie);
-  console.log(`debug:hostname`, new URL(configuration.appUrl).hostname);
-  console.log("--------------");
-
-  const tokenParams = new URLSearchParams();
-  tokenParams.append("code", code as string);
-  tokenParams.append("grant_type", "authorization_code");
-  tokenParams.append("client_id", configuration.portal.clientId);
-  tokenParams.append("redirect_uri", configuration.portal.redirectUrl);
-  tokenParams.append("code_verifier", codeVerifier);
-
   try {
+    const code = request.nextUrl.searchParams.get("code");
+    const state = request.nextUrl.searchParams.get("state");
+
+    const requestCookie = cookies();
+    const sessionCookie = requestCookie.get(sessionCookieName);
+    const returnUrlCookie = requestCookie.get(returnUrlCookieName);
+    const stateCookie = requestCookie.get(stateCookieName);
+    const codeVerifierCookie = requestCookie.get(codeVerifierCookieName);
+
+    console.log(`debug:code`, code);
+    console.log(`debug:state`, state);
+    console.log(`debug:sessionId`, sessionCookie);
+    console.log(`debug:returnUrl`, returnUrlCookie);
+    console.log(`debug:stateCookie`, stateCookie);
+    console.log(`debug:codeVerifierCookie`, codeVerifierCookie);
+    console.log(`debug:hostname`, new URL(configuration.appUrl).hostname);
+    console.log("--------------");
+
+    if (!codeVerifierCookie)
+      throw new SignalError("Code verifier cookie not found");
+    if (!stateCookie) throw new SignalError("State cookie not found");
+    if (stateCookie.value !== state) throw new SignalError("Invalid state");
+
+    const tokenParams = new URLSearchParams();
+    tokenParams.append("code", code as string);
+    tokenParams.append("grant_type", "authorization_code");
+    tokenParams.append("client_id", configuration.portal.clientId);
+    tokenParams.append("redirect_uri", configuration.portal.redirectUrl);
+    tokenParams.append("code_verifier", codeVerifierCookie.value);
+
     const wellKnownResponse = await fetch(
       `${configuration.portal.issuer}/.well-known/openid-configuration`
     );
@@ -42,7 +55,7 @@ async function handler(request: NextRequest) {
     };
 
     if (wellKnownResponse.status !== 200) {
-      return NextResponse.json(wellKnown, { status: wellKnownResponse.status });
+      throw new SignalError(wellKnown, wellKnownResponse.status);
     }
 
     const response = await fetch(wellKnown.token_endpoint, {
@@ -62,7 +75,7 @@ async function handler(request: NextRequest) {
     };
 
     if (response.status !== 200) {
-      return NextResponse.json(result, { status: response.status });
+      throw new SignalError(result, wellKnownResponse.status);
     }
 
     console.log(`status:`, response.status);
@@ -111,16 +124,29 @@ async function handler(request: NextRequest) {
 
     const redirectUrl = returnUrlCookie?.value || configuration.appUrl;
     return NextResponse.redirect(redirectUrl);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error exchanging code for token:", error);
-
-    return NextResponse.json(error, {
-      status: 500,
-    });
+    return NextResponse.json(error.toJSON(), { status: error.code });
   }
 }
 
 export { handler as GET, handler as POST };
+
+class SignalError extends Error {
+  code?: number;
+
+  constructor(error: any, code?: number) {
+    super(error);
+    this.code = code || 500;
+    Object.setPrototypeOf(this, SignalError.prototype);
+  }
+
+  toJSON() {
+    return {
+      message: this.message,
+    };
+  }
+}
 
 async function getOAuthUserId(params: {
   userinfoEndpoint: string;
