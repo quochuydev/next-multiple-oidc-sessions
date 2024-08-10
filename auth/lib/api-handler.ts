@@ -1,6 +1,5 @@
 import type { Default } from "@/lib/api-caller";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import type * as z from "zod";
 
 export enum ErrorCode {
@@ -52,15 +51,10 @@ export const isValidRequest = <T>(params: {
   schema.parse(data);
 };
 
-export const ok = <T>(result?: T) => {
-  return NextResponse.json(result || {}, {
+export const ok = <T>(result: { body: T; headers: Record<string, string> }) => {
+  return NextResponse.json(result.body || {}, {
     status: 200,
-    headers: {
-      "Access-Control-Allow-Credentials": "true",
-      "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Allow-Origin": "https://app1.example.local",
-    },
+    headers: result.headers,
   });
 };
 
@@ -126,7 +120,10 @@ export const defaultHandler = async <T extends Default>(
     request: NextRequest;
     tracingName?: string;
   },
-  handle: (body: T["data"]) => Promise<T["result"]>
+  handle: (body: T["data"]) => Promise<{
+    body: T["result"];
+    headers: Record<string, string>;
+  }>
 ) => {
   const { request, tracingName = "" } = params;
 

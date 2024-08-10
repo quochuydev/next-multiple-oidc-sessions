@@ -12,7 +12,7 @@ tasks:
     deps:
       - auth
       - app1
-      # - app2
+      - app2
   up:
     desc: Run docker-compose
     cmds:

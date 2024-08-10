@@ -9,16 +9,26 @@ export async function GET(request: NextRequest, res: NextResponse) {
   return defaultHandler<APIGetSessions>({ request }, async () => {
     const requestCookie = cookies();
     const sessionCookie = requestCookie.get(sessionCookieName);
-
     const sessionId = sessionCookie ? sessionCookie.value : undefined;
-    if (!sessionId) return { sessions: [] };
 
-    const sessions = await prisma.userSession.findMany({
-      where: {
-        sessionId,
+    const sessions = sessionId
+      ? await prisma.userSession.findMany({
+          where: {
+            sessionId,
+          },
+        })
+      : [];
+
+    return {
+      body: {
+        sessions,
       },
-    });
-
-    return { sessions };
+      headers: {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Origin": request.headers.get("origin") as string,
+      },
+    };
   });
 }
