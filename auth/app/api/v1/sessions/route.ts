@@ -15,6 +15,7 @@ export async function GET(request: NextRequest, res: NextResponse) {
       ? await prisma.userSession.findMany({
           where: {
             sessionId,
+            deletedAt: null,
           },
         })
       : [];

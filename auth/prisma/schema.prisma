@@ -8,7 +8,7 @@ generator client {
 }
 
 model UserSession {
-    id           String   @id @default(uuid())
+    id           String    @id @default(uuid())
     sessionId    String
     userId       String?
     accessToken  String
@@ -16,5 +16,6 @@ model UserSession {
     expiresIn    Int //miliseconds
     refreshToken String?
     idToken      String?
-    createdAt    DateTime @default(now())
+    createdAt    DateTime  @default(now())
+    deletedAt    DateTime?
 }

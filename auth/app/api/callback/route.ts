@@ -64,25 +64,18 @@ async function handler(request: NextRequest) {
 
     const sessionId = sessionCookie ? sessionCookie.value : uuid();
 
-    const existingSession = await prisma.userSession.findFirst({
+    await prisma.userSession.updateMany({
       where: {
         sessionId,
         userId,
       },
+      data: {
+        deletedAt: new Date(),
+      },
     });
 
-    const session = await prisma.userSession.upsert({
-      where: {
-        id: existingSession?.id,
-      },
-      update: {
-        accessToken: result.access_token,
-        tokenType: result.token_type,
-        expiresIn: result.expires_in,
-        refreshToken: result.refresh_token,
-        idToken: result.id_token,
-      },
-      create: {
+    await prisma.userSession.create({
+      data: {
         sessionId,
         userId,
         accessToken: result.access_token,
@@ -98,24 +91,14 @@ async function handler(request: NextRequest) {
       value: sessionId,
       sameSite: "lax",
       path: "/",
-      domain: "example.local",
+      domain: configuration.domain,
       httpOnly: configuration.cookie.httpOnly,
       secure: configuration.cookie.secure,
       maxAge: 30 * 24 * 60 * 60, // 30d
     });
 
-    if (returnUrlCookie) return NextResponse.redirect(returnUrlCookie.value);
-
-    return NextResponse.json(
-      {
-        sessionId,
-        session,
-        result,
-      },
-      {
-        status: response.status,
-      }
-    );
+    const redirectUrl = returnUrlCookie?.value || configuration.appUrl;
+    return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error("Error exchanging code for token:", error);
 

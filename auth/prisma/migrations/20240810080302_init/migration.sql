@@ -8,5 +8,6 @@ CREATE TABLE "UserSession" (
     "expiresIn" INTEGER NOT NULL,
     "refreshToken" TEXT,
     "idToken" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" DATETIME
 );
