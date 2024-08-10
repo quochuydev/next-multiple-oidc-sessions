@@ -18,6 +18,12 @@ Loading...
 brew install go-task/tap/go-task
 ```
 
+#### Get all tasks
+
+```sh
+task
+```
+
 #### Install packages
 
 ```sh
