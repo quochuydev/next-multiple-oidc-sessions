@@ -1,15 +1,27 @@
-import { URLSearchParams } from "url";
 import configuration from "@/configuration";
-import { NextRequest, NextResponse } from "next/server";
 import { codeVerifier } from "@/lib/bytes";
+import { prisma } from "@/lib/prisma";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { URLSearchParams } from "url";
 import { v4 as uuid } from "uuid";
-import { setCookie } from "@/lib/cookie";
+import { sessionCookieName, returnUrlCookieName } from "@/lib/constant";
 
 async function handler(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
+
+  const requestCookie = cookies();
+  const sessionCookie = requestCookie.get(sessionCookieName);
+  const returnUrl = requestCookie.get(returnUrlCookieName);
+
   console.log(`debug:code`, code);
   console.log(`debug:state`, state);
+  console.log(`debug:sessionId`, sessionCookie?.value);
+  console.log(`debug:returnUrl`, returnUrl);
+  console.log(`debug:hostname`, new URL(configuration.appUrl).hostname);
+  console.log("--------------");
 
   const tokenParams = new URLSearchParams();
   tokenParams.append("code", code as string);
@@ -30,23 +42,74 @@ async function handler(request: NextRequest) {
       }
     );
 
-    const result = await response.json();
+    const tokenData = await response.json();
     console.log(`status:`, response.status);
-    console.log(`result:`, result);
+    console.log(`debug:tokenData`, tokenData);
+    const { access_token, token_type, refresh_token, expires_in, id_token } =
+      tokenData;
 
-    setCookie("sessionId", uuid());
+    let userId: string | null = null;
 
-    return NextResponse.json(result, { status: response.status });
+    if (id_token) {
+      const decodedIdToken = jwt.decode(id_token);
+      console.log(`debug:decodedIdToken`, decodedIdToken);
+      userId = decodedIdToken ? (decodedIdToken.sub as string) : null;
+    } else {
+      const userInfo = await fetch(
+        `${configuration.portal.issuer}/oidc/v1/userinfo`,
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      ).then((res) => res.json());
+      console.log(`debug:userInfo`, userInfo);
+      userId = userInfo.sub;
+    }
+
+    const sessionId = sessionCookie ? sessionCookie.value : uuid();
+
+    const session = await prisma.userSession.create({
+      data: {
+        sessionId,
+        accessToken: access_token,
+        tokenType: token_type,
+        expiresIn: expires_in,
+        refreshToken: refresh_token,
+        idToken: id_token,
+        userId,
+      },
+    });
+
+    requestCookie.set({
+      name: sessionCookieName,
+      value: sessionId,
+      sameSite: configuration.cookie.sameSite,
+      path: configuration.cookie.path,
+      httpOnly: configuration.cookie.httpOnly,
+      secure: configuration.cookie.secure,
+      domain: configuration.cookie.domain,
+    });
+
+    return NextResponse.json(
+      {
+        sessionId,
+        session,
+        tokenData,
+      },
+      {
+        status: response.status,
+      }
+    );
   } catch (error) {
     console.error("Error exchanging code for token:", error);
 
     return NextResponse.json(
       {
-        message: "Bad request",
-        error,
+        message: "Internal server error",
       },
       {
-        status: 400,
+        status: 500,
       }
     );
   }

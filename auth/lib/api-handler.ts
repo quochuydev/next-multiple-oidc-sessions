@@ -1,12 +1,12 @@
-import type { Default } from '@/lib/api-caller';
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
-import type * as z from 'zod';
+import type { Default } from "@/lib/api-caller";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import type * as z from "zod";
 
 export enum ErrorCode {
-  NOT_FOUND = 'NOT_FOUND',
-  INVALID_DATA = 'INVALID_DATA',
-  UNAUTHORIZED = 'UNAUTHORIZED',
+  NOT_FOUND = "NOT_FOUND",
+  INVALID_DATA = "INVALID_DATA",
+  UNAUTHORIZED = "UNAUTHORIZED",
 }
 
 type ZodError = {
@@ -24,7 +24,7 @@ type ZitadelError = {
     details: Array<{
       id: string;
       message: string;
-      '@type': string;
+      "@type": string;
     }>;
     message: string;
   };
@@ -53,7 +53,15 @@ export const isValidRequest = <T>(params: {
 };
 
 export const ok = <T>(result?: T) => {
-  return NextResponse.json(result || {}, { status: 200 });
+  return NextResponse.json(result || {}, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Credentials": "true",
+      "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Origin": "https://app1.example.local",
+    },
+  });
 };
 
 export const error = (e: any) => {
@@ -62,11 +70,11 @@ export const error = (e: any) => {
 };
 
 export function transformError(
-  error: Error | ZodError | ZitadelError | ResponseError,
+  error: Error | ZodError | ZitadelError | ResponseError
 ) {
   const items = [
     {
-      description: 'Zod validation error',
+      description: "Zod validation error",
       match: () => {
         const e = error as ZodError;
         return !!e.code && !!e.error?.code && !!e.error?.message;
@@ -80,8 +88,8 @@ export function transformError(
       }),
     },
     {
-      description: 'error instanceof Error',
-      match: () => error instanceof Error && error.name === 'Error',
+      description: "error instanceof Error",
+      match: () => error instanceof Error && error.name === "Error",
       do: () => ({
         code: 400,
         errors: {
@@ -92,7 +100,7 @@ export function transformError(
       }),
     },
     {
-      description: 'common error',
+      description: "common error",
       match: () => {
         const e = error as ResponseError;
         return !!e.code && !!e.errors && !!e.errors.code;
@@ -100,7 +108,7 @@ export function transformError(
       do: () => error as ResponseError,
     },
     {
-      description: 'Not yet handle',
+      description: "Not yet handle",
       match: () => true,
       do: () => ({ code: 500, errors: { error } }),
     },
@@ -118,17 +126,17 @@ export const defaultHandler = async <T extends Default>(
     request: NextRequest;
     tracingName?: string;
   },
-  handle: (body: T['data']) => Promise<T['result']>,
+  handle: (body: T["data"]) => Promise<T["result"]>
 ) => {
-  const { request, tracingName = '' } = params;
+  const { request, tracingName = "" } = params;
 
-  const userAgent = request.headers.get('user-agent');
+  const userAgent = request.headers.get("user-agent");
 
   try {
     const { body } =
-      request.method === 'GET' || request.method === 'DELETE'
+      request.method === "GET" || request.method === "DELETE"
         ? { body: {} }
-        : await parseRequest<T['data']>(request);
+        : await parseRequest<T["data"]>(request);
 
     const result = await handle(body);
     return ok(result);

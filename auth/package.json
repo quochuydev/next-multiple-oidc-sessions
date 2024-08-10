@@ -8,12 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "generate": "prisma generate",
-    "prisma-dev": "prisma migrate dev",
+    "prisma-dev": "prisma migrate dev && yarn generate",
     "prisma-create": "prisma migrate dev --create-only",
-    "prisma-deploy": "prisma migrate deploy"
+    "prisma-deploy": "prisma migrate deploy && yarn generate"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",
+    "cors": "^2.8.5",
     "next": "14.2.5",
     "prisma": "^5.18.0",
     "react": "^18",

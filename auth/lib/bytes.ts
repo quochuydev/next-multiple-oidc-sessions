@@ -7,7 +7,7 @@ export const codeChallenge = base64URLEncode(
   crypto.createHash("sha256").update(codeVerifier).digest()
 );
 
-function base64URLEncode(str: any) {
+function base64URLEncode(str: Buffer) {
   return str
     .toString("base64")
     .replace(/\+/g, "-")

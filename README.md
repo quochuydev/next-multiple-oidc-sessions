@@ -18,18 +18,10 @@ Loading...
 brew install go-task/tap/go-task
 ```
 
-#### Generate SSL certificates
+#### Install packages
 
 ```sh
-cd nginx
-
-./openssl.sh
-```
-
-#### Trust the certificates (MacOS)
-
-```sh
-security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost.crt
+yarn install
 ```
 
 #### Add hosts to `/etc/hosts`
@@ -38,13 +30,15 @@ security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain 
 echo "127.0.0.1 app1.example.local app2.example.local auth.example.local" | sudo tee -a /etc/hosts > /dev/null
 ```
 
-#### Install packages
+#### Trust the certificates (MacOS)
 
 ```sh
-yarn install
+cd nginx
+
+security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost.crt
 ```
 
-#### Start nginx container 🚀
+#### Start containers 🚀
 
 ```
 task up
@@ -53,3 +47,11 @@ task up
 ### Dev 👉
 
 `task dev`
+
+### Generate New SSL certificates
+
+```sh
+cd nginx
+
+./openssl.sh
+```

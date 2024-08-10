@@ -15,6 +15,14 @@ if (process.env.ENV_PATH) {
 
 const schema = z.object({
   appUrl: z.string(),
+  cookie: z.object({
+    domain: z.string(),
+    sameSite: z.string(),
+    path: z.string(),
+    httpOnly: z.boolean(),
+    secure: z.boolean(),
+    maxAge: z.number(),
+  }),
   zitadel: z.object({
     url: z.string(),
   }),
@@ -27,6 +35,14 @@ const schema = z.object({
 
 const configuration = {
   appUrl: "https://auth.example.local",
+  cookie: {
+    domain: "example.local",
+    sameSite: "lax" as "lax" | "strict" | "none",
+    path: "/",
+    httpOnly: true,
+    secure: false,
+    maxAge: 30 * 24 * 60 * 60, // 30d
+  },
   zitadel: {
     url: "https://system-v1-fpms4l.zitadel.cloud",
   },
