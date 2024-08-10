@@ -24,10 +24,15 @@ export default function Home() {
       >
         Login
       </button>
-
-      <pre
-        style={{ textWrap: "wrap", maxWidth: 1200, overflowWrap: "break-word" }}
+      <button
+        onClick={() => {
+          //
+        }}
       >
+        Logout
+      </button>
+
+      <pre className="json-output" style={{ maxWidth: 1200 }}>
         <p>{JSON.stringify(sessions, null, 2)}</p>
       </pre>
     </div>

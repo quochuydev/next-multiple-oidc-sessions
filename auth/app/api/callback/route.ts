@@ -1,6 +1,8 @@
 import configuration from "@/configuration";
+import { SignalError } from "@/lib/bytes";
 import {
   codeVerifierCookieName,
+  redirectUrlCookieName,
   returnUrlCookieName,
   sessionCookieName,
   stateCookieName,
@@ -18,24 +20,20 @@ async function handler(request: NextRequest) {
     const state = request.nextUrl.searchParams.get("state");
 
     const requestCookie = cookies();
-    const sessionCookie = requestCookie.get(sessionCookieName);
     const returnUrlCookie = requestCookie.get(returnUrlCookieName);
-    const stateCookie = requestCookie.get(stateCookieName);
+
     const codeVerifierCookie = requestCookie.get(codeVerifierCookieName);
-
-    console.log(`debug:code`, code);
-    console.log(`debug:state`, state);
-    console.log(`debug:sessionId`, sessionCookie);
-    console.log(`debug:returnUrl`, returnUrlCookie);
-    console.log(`debug:stateCookie`, stateCookie);
-    console.log(`debug:codeVerifierCookie`, codeVerifierCookie);
-    console.log(`debug:hostname`, new URL(configuration.appUrl).hostname);
-    console.log("--------------");
-
     if (!codeVerifierCookie)
       throw new SignalError("Code verifier cookie not found");
+
+    const stateCookie = requestCookie.get(stateCookieName);
     if (!stateCookie) throw new SignalError("State cookie not found");
     if (stateCookie.value !== state) throw new SignalError("Invalid state");
+
+    const redirectCookie = requestCookie.get(redirectUrlCookieName);
+    if (!redirectCookie) throw new SignalError("Redirect url cookie not found");
+    if (redirectCookie.value !== configuration.portal.redirectUrl)
+      throw new SignalError("Invalid redirect url");
 
     const tokenParams = new URLSearchParams();
     tokenParams.append("code", code as string);
@@ -87,6 +85,7 @@ async function handler(request: NextRequest) {
       accessToken: result.access_token,
     });
 
+    const sessionCookie = requestCookie.get(sessionCookieName);
     const sessionId = sessionCookie ? sessionCookie.value : uuid();
 
     await prisma.userSession.updateMany({
@@ -122,6 +121,50 @@ async function handler(request: NextRequest) {
       maxAge: 30 * 24 * 60 * 60, // 30d
     });
 
+    requestCookie.set({
+      name: returnUrlCookieName,
+      value: "",
+      maxAge: 0,
+      domain: new URL(configuration.appUrl).hostname,
+      sameSite: "strict",
+      path: "/",
+      httpOnly: configuration.cookie.httpOnly,
+      secure: configuration.cookie.secure,
+    });
+
+    requestCookie.set({
+      name: stateCookieName,
+      value: "",
+      maxAge: 0,
+      domain: new URL(configuration.appUrl).hostname,
+      sameSite: "strict",
+      path: "/",
+      httpOnly: configuration.cookie.httpOnly,
+      secure: configuration.cookie.secure,
+    });
+
+    requestCookie.set({
+      name: redirectUrlCookieName,
+      value: "",
+      maxAge: 0,
+      domain: new URL(configuration.appUrl).hostname,
+      sameSite: "strict",
+      path: "/",
+      httpOnly: configuration.cookie.httpOnly,
+      secure: configuration.cookie.secure,
+    });
+
+    requestCookie.set({
+      name: codeVerifierCookieName,
+      value: "",
+      maxAge: 0,
+      domain: new URL(configuration.appUrl).hostname,
+      sameSite: "strict",
+      path: "/",
+      httpOnly: configuration.cookie.httpOnly,
+      secure: configuration.cookie.secure,
+    });
+
     const redirectUrl = returnUrlCookie?.value || configuration.appUrl;
     return NextResponse.redirect(redirectUrl);
   } catch (error: any) {
@@ -131,22 +174,6 @@ async function handler(request: NextRequest) {
 }
 
 export { handler as GET, handler as POST };
-
-class SignalError extends Error {
-  code?: number;
-
-  constructor(error: any, code?: number) {
-    super(error);
-    this.code = code || 500;
-    Object.setPrototypeOf(this, SignalError.prototype);
-  }
-
-  toJSON() {
-    return {
-      message: this.message,
-    };
-  }
-}
 
 async function getOAuthUserId(params: {
   userinfoEndpoint: string;

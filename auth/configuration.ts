@@ -32,7 +32,7 @@ const configuration = {
   domain: "example.local",
   cookie: {
     httpOnly: true,
-    secure: false,
+    secure: true,
   },
   portal: {
     // issuer: "https://zitadel-login-ui-v2.vercel.app",
