@@ -31,16 +31,27 @@ async function handler(request: NextRequest) {
   tokenParams.append("code_verifier", codeVerifier);
 
   try {
-    const response = await fetch(
-      `${configuration.portal.issuer}/oauth/v2/token`,
-      {
-        method: "post",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: tokenParams,
-      }
+    const wellKnownResponse = await fetch(
+      `${configuration.portal.issuer}/.well-known/openid-configuration`
     );
+
+    const wellKnown = (await wellKnownResponse.json()) as {
+      issuer: string;
+      token_endpoint: string;
+      userinfo_endpoint: string;
+    };
+
+    if (wellKnownResponse.status !== 200) {
+      return NextResponse.json(wellKnown, { status: wellKnownResponse.status });
+    }
+
+    const response = await fetch(wellKnown.token_endpoint, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: tokenParams,
+    });
 
     const result = (await response.json()) as {
       access_token: string;
@@ -58,6 +69,7 @@ async function handler(request: NextRequest) {
     console.log(`debug:result`, result);
 
     const userId = await getOAuthUserId({
+      userinfoEndpoint: wellKnown.userinfo_endpoint,
       idToken: result.id_token,
       accessToken: result.access_token,
     });
@@ -111,10 +123,11 @@ async function handler(request: NextRequest) {
 export { handler as GET, handler as POST };
 
 async function getOAuthUserId(params: {
+  userinfoEndpoint: string;
   idToken: string;
   accessToken: string;
 }) {
-  const { idToken, accessToken } = params;
+  const { userinfoEndpoint, idToken, accessToken } = params;
 
   if (idToken) {
     const decodedIdToken = jwt.decode(idToken);
@@ -122,14 +135,11 @@ async function getOAuthUserId(params: {
     return decodedIdToken ? (decodedIdToken.sub as string) : null;
   }
 
-  const userInfo = await fetch(
-    `${configuration.portal.issuer}/oidc/v1/userinfo`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  ).then((res) => res.json());
+  const userInfo = await fetch(userinfoEndpoint, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then((res) => res.json());
 
   console.log(`debug:userInfo`, userInfo);
   return userInfo.sub;
