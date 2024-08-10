@@ -16,6 +16,7 @@ if (process.env.ENV_PATH) {
 const schema = z.object({
   appUrl: z.string(),
   domain: z.string(),
+  originRegex: z.unknown(),
   cookie: z.object({
     httpOnly: z.boolean(),
     secure: z.boolean(),
@@ -30,6 +31,7 @@ const schema = z.object({
 const configuration = {
   appUrl: "https://auth.example.local",
   domain: "example.local",
+  originRegex: /^(.*\.)?(example\.local|real-domain\.com)$/,
   cookie: {
     httpOnly: true,
     secure: true,

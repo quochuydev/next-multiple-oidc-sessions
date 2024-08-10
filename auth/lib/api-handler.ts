@@ -1,5 +1,5 @@
 import type { Default } from "@/lib/api-caller";
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import type * as z from "zod";
 
 export enum ErrorCode {
@@ -31,10 +31,10 @@ type ZitadelError = {
 
 type ResponseError = {
   code: number;
-  errors: {
+  error: {
     code: ErrorCode;
     message: string;
-    error?: string;
+    info?: any;
   };
 };
 
@@ -51,36 +51,26 @@ export const isValidRequest = <T>(params: {
   schema.parse(data);
 };
 
-export const ok = <T>(result: { body: T; headers: Record<string, string> }) => {
-  return NextResponse.json(result.body || {}, {
+export const ok = <T>(body: T, headers: Record<string, string>) => {
+  return NextResponse.json(body || {}, {
     status: 200,
-    headers: result.headers,
+    headers,
   });
 };
 
-export const error = (e: any) => {
+export const error = (e: any, headers: Record<string, string>) => {
   const { code: status, errors } = transformError(e) as ResponseError;
-  return NextResponse.json(errors, { status });
+
+  return NextResponse.json(errors, {
+    status,
+    headers,
+  });
 };
 
 export function transformError(
   error: Error | ZodError | ZitadelError | ResponseError
 ) {
   const items = [
-    {
-      description: "Zod validation error",
-      match: () => {
-        const e = error as ZodError;
-        return !!e.code && !!e.error?.code && !!e.error?.message;
-      },
-      do: () => ({
-        code: 400,
-        errors: {
-          code: ErrorCode.INVALID_DATA,
-          message: (error as ZodError).error.message,
-        },
-      }),
-    },
     {
       description: "error instanceof Error",
       match: () => error instanceof Error && error.name === "Error",
@@ -97,7 +87,7 @@ export function transformError(
       description: "common error",
       match: () => {
         const e = error as ResponseError;
-        return !!e.code && !!e.errors && !!e.errors.code;
+        return !!e.code && !!e.error && !!e.error.code;
       },
       do: () => error as ResponseError,
     },
@@ -110,6 +100,7 @@ export function transformError(
 
   for (const item of items) {
     if (item.match()) {
+      console.log(`debug:description`, item.description);
       return item.do();
     }
   }
@@ -118,15 +109,12 @@ export function transformError(
 export const defaultHandler = async <T extends Default>(
   params: {
     request: NextRequest;
+    responseHeaders: Record<string, string>;
     tracingName?: string;
   },
-  handle: (body: T["data"]) => Promise<{
-    body: T["result"];
-    headers: Record<string, string>;
-  }>
+  handle: (body: T["data"]) => Promise<T["result"]>
 ) => {
-  const { request, tracingName = "" } = params;
-
+  const { request, responseHeaders = {}, tracingName = "" } = params;
   const userAgent = request.headers.get("user-agent");
 
   try {
@@ -136,9 +124,9 @@ export const defaultHandler = async <T extends Default>(
         : await parseRequest<T["data"]>(request);
 
     const result = await handle(body);
-    return ok(result);
+    return ok(result, responseHeaders);
   } catch (err) {
     console.log(`debug:${tracingName}`, userAgent, request.method, err);
-    return error(err);
+    return error(err, responseHeaders);
   }
 };

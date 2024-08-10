@@ -1,13 +1,3 @@
-Loading...
-
-.
-
-.
-
-.
-
-...Forever.
-
 ## Commands
 
 ### Pre-Dev 🙌
