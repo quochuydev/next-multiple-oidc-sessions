@@ -14,5 +14,4 @@ extendedKeyUsage    = serverAuth
 basicConstraints=CA:TRUE,pathlen:0
 [alt_names]
 DNS.1 = auth.example.local
-DNS.2 = app1.example.local
-DNS.3 = app2.example.local
+DNS.2 = app.example.local

@@ -42,22 +42,24 @@ async function handler(request: NextRequest) {
       }
     );
 
-    const tokenData = (await response.json()) as {
+    const result = (await response.json()) as {
       access_token: string;
       token_type: string;
       refresh_token: string;
       expires_in: number;
       id_token: string;
     };
-    const { access_token, token_type, refresh_token, expires_in, id_token } =
-      tokenData;
+
+    if (response.status !== 200) {
+      return NextResponse.json(result, { status: response.status });
+    }
 
     console.log(`status:`, response.status);
-    console.log(`debug:tokenData`, tokenData);
+    console.log(`debug:result`, result);
 
     const userId = await getOAuthUserId({
-      idToken: id_token,
-      accessToken: access_token,
+      idToken: result.id_token,
+      accessToken: result.access_token,
     });
 
     const sessionId = sessionCookie ? sessionCookie.value : uuid();
@@ -65,11 +67,11 @@ async function handler(request: NextRequest) {
     const session = await prisma.userSession.create({
       data: {
         sessionId,
-        accessToken: access_token,
-        tokenType: token_type,
-        expiresIn: expires_in,
-        refreshToken: refresh_token,
-        idToken: id_token,
+        accessToken: result.access_token,
+        tokenType: result.token_type,
+        expiresIn: result.expires_in,
+        refreshToken: result.refresh_token,
+        idToken: result.id_token,
         userId,
       },
     });
@@ -88,7 +90,7 @@ async function handler(request: NextRequest) {
       {
         sessionId,
         session,
-        tokenData,
+        result,
       },
       {
         status: response.status,
@@ -97,14 +99,9 @@ async function handler(request: NextRequest) {
   } catch (error) {
     console.error("Error exchanging code for token:", error);
 
-    return NextResponse.json(
-      {
-        message: "Internal server error",
-      },
-      {
-        status: 500,
-      }
-    );
+    return NextResponse.json(error, {
+      status: 500,
+    });
   }
 }
 

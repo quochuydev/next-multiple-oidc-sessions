@@ -5,8 +5,6 @@ export default function Home() {
   const [sessions, setSessions] = useState([]);
 
   useEffect(() => {
-    console.log("App1 loaded");
-
     fetch("https://auth.example.local/api/v1/sessions", {
       method: "GET",
       credentials: "include",
@@ -21,7 +19,7 @@ export default function Home() {
       <button
         onClick={() => {
           window.location.href =
-            "https://auth.example.local/login?returnUrl=https://app1.example.local";
+            "https://auth.example.local/login?returnUrl=https://app.example.local/app1";
         }}
       >
         Login

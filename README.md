@@ -33,7 +33,7 @@ yarn install
 #### Add hosts to `/etc/hosts`
 
 ```sh
-echo "127.0.0.1 app1.example.local app2.example.local auth.example.local" | sudo tee -a /etc/hosts > /dev/null
+echo "127.0.0.1 app.example.local auth.example.local" | sudo tee -a /etc/hosts > /dev/null
 ```
 
 #### Trust the certificates (MacOS)
@@ -41,7 +41,7 @@ echo "127.0.0.1 app1.example.local app2.example.local auth.example.local" | sudo
 ```sh
 cd nginx
 
-security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain localhost.crt
 ```
 
 #### Start containers 🚀
