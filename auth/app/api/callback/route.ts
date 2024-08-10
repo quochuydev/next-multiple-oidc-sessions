@@ -14,12 +14,12 @@ async function handler(request: NextRequest) {
 
   const requestCookie = cookies();
   const sessionCookie = requestCookie.get(sessionCookieName);
-  const returnUrl = requestCookie.get(returnUrlCookieName);
+  const returnUrlCookie = requestCookie.get(returnUrlCookieName);
 
   console.log(`debug:code`, code);
   console.log(`debug:state`, state);
   console.log(`debug:sessionId`, sessionCookie?.value);
-  console.log(`debug:returnUrl`, returnUrl);
+  console.log(`debug:returnUrl`, returnUrlCookie);
   console.log(`debug:hostname`, new URL(configuration.appUrl).hostname);
   console.log("--------------");
 
@@ -64,27 +64,47 @@ async function handler(request: NextRequest) {
 
     const sessionId = sessionCookie ? sessionCookie.value : uuid();
 
-    const session = await prisma.userSession.create({
-      data: {
+    const existingSession = await prisma.userSession.findFirst({
+      where: {
         sessionId,
+        userId,
+      },
+    });
+
+    const session = await prisma.userSession.upsert({
+      where: {
+        id: existingSession?.id,
+      },
+      update: {
         accessToken: result.access_token,
         tokenType: result.token_type,
         expiresIn: result.expires_in,
         refreshToken: result.refresh_token,
         idToken: result.id_token,
+      },
+      create: {
+        sessionId,
         userId,
+        accessToken: result.access_token,
+        tokenType: result.token_type,
+        expiresIn: result.expires_in,
+        refreshToken: result.refresh_token,
+        idToken: result.id_token,
       },
     });
 
     requestCookie.set({
       name: sessionCookieName,
       value: sessionId,
-      sameSite: configuration.cookie.sameSite,
-      path: configuration.cookie.path,
+      sameSite: "lax",
+      path: "/",
+      domain: "example.local",
       httpOnly: configuration.cookie.httpOnly,
       secure: configuration.cookie.secure,
-      domain: configuration.cookie.domain,
+      maxAge: 30 * 24 * 60 * 60, // 30d
     });
+
+    if (returnUrlCookie) return NextResponse.redirect(returnUrlCookie.value);
 
     return NextResponse.json(
       {
