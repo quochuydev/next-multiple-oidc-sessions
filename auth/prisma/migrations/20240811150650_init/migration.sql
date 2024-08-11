@@ -17,10 +17,10 @@ CREATE TABLE "Session" (
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "email" TEXT NOT NULL,
-    "emailVerified" BOOLEAN NOT NULL,
-    "name" TEXT NOT NULL,
-    "sub" TEXT NOT NULL,
-    "preferredUsername" TEXT NOT NULL,
+    "sub" TEXT,
+    "name" TEXT,
+    "preferredUsername" TEXT,
+    "email" TEXT,
+    "emailVerified" BOOLEAN,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

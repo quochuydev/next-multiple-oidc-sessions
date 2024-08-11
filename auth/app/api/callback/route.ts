@@ -21,10 +21,11 @@ async function handler(request: NextRequest) {
 
     const requestCookie = cookies();
     const returnUrlCookie = requestCookie.get(returnUrlCookieName);
-    const authSessionCookie = requestCookie.get(authSessionCookieName);
     const codeVerifierCookie = requestCookie.get(codeVerifierCookieName);
     const stateCookie = requestCookie.get(stateCookieName);
     const redirectCookie = requestCookie.get(redirectUrlCookieName);
+    const authSessionCookie = requestCookie.get(authSessionCookieName);
+    const authSession = authSessionCookie ? authSessionCookie.value : uuid();
 
     if (!codeVerifierCookie) throw new Error("Code verifier cookie not found");
 
@@ -83,19 +84,17 @@ async function handler(request: NextRequest) {
       accessToken: result.access_token,
     });
 
-    const authSession = authSessionCookie ? authSessionCookie.value : uuid();
+    const user = await upsertUser(userInfo);
 
     await prisma.session.updateMany({
       where: {
         authSession,
-        sub: userInfo.sub,
+        userId: user.id,
       },
       data: {
         deletedAt: new Date(),
       },
     });
-
-    const user = await upsertUser(userInfo);
 
     await prisma.session.create({
       data: {
@@ -106,7 +105,6 @@ async function handler(request: NextRequest) {
         expiresIn: result.expires_in,
         refreshToken: result.refresh_token,
         idToken: result.id_token,
-        sub: userInfo.sub,
         user: {
           connect: {
             id: user.id,
@@ -174,6 +172,8 @@ async function upsertUser(userInfo: {
   name: string;
   preferred_username: string;
 }) {
+  console.log(`debug:userInfo`, userInfo);
+
   const existingUser = await prisma.user.findFirst({
     where: {
       sub: userInfo.sub,

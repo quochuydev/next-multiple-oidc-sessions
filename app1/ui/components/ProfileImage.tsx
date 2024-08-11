@@ -14,10 +14,9 @@ export default function ProfileImage(props: {
   const router = useRouter();
 
   const user = {
-    loginName: session?.userId,
-    displayName: session?.userId,
-    orgId: session?.userId,
-    userId: session?.userId,
+    loginName: session?.user?.preferredUsername,
+    displayName: session?.user?.name,
+    userId: session?.user?.sub,
   };
 
   return (
@@ -42,12 +41,12 @@ export default function ProfileImage(props: {
       >
         <Menu.Items className="absolute w-80 right-0 mt-3 origin-top-right divide-y divide-gray-500 rounded-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white">
           <div className="flex flex-col items-center py-4 px-1">
-            <p>{user.loginName}</p>
-            <p className="text-sm">{user.displayName}</p>
+            <p>{user.displayName}</p>
+            <p className="text-sm">{user.loginName}</p>
           </div>
 
           {sessions?.map((session, index: number) => (
-            <Menu.Item key={session?.userId}>
+            <Menu.Item key={session?.user?.sub}>
               {() => (
                 <button
                   onClick={() => {
@@ -57,14 +56,14 @@ export default function ProfileImage(props: {
                   className={`group flex items-center w-full px-2 py-2 text-sm`}
                 >
                   <div className="w-8 h-8 mr-2 flex items-center justify-center rounded-full bg-black bg-opacity-20">
-                    <span className="text-sm">
-                      {session ? session.userId?.substring(0, 1) : "A"}
-                    </span>
+                    {session?.user?.preferredUsername?.substring(0, 1) || "A"}
                   </div>
 
                   <div className="flex flex-col justify-star text-left">
-                    <span>{session?.userId}</span>
-                    <span className="text-xs">{session?.userId}</span>
+                    <span>{session?.user?.name}</span>
+                    <span className="text-xs">
+                      {session?.user?.preferredUsername}
+                    </span>
                   </div>
                 </button>
               )}
@@ -92,7 +91,7 @@ export default function ProfileImage(props: {
                     return_url: "https://app.example.local/app1",
                   });
 
-                  window.location.href = `https://auth.example.local/login?${params.toString()}`;
+                  window.location.href = `https://auth.example.local/auth/signin?${params.toString()}`;
                 }}
               >
                 + Add other account

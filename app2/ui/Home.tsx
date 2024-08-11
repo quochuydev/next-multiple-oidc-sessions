@@ -22,25 +22,33 @@ export default function Home() {
     <div>
       <button
         onClick={() => {
-          window.location.href =
-            "https://auth.example.local/login?returnUrl=https://app.example.local/app2";
+          const params = new URLSearchParams({
+            prompt: "select_account",
+            scope: [
+              "openid",
+              "userinfo",
+              "email",
+              "profile",
+              "address",
+              "offline_access",
+              "urn:zitadel:iam:user:resourceowner",
+              "urn:zitadel:iam:org:project:id:zitadel:aud",
+            ].join(" "),
+            return_url: "https://app.example.local/app2",
+          });
+
+          window.location.href = `https://auth.example.local/auth/signin?${params.toString()}`;
         }}
       >
         Login
       </button>
       <button
         onClick={async () => {
-          fetch("https://auth.example.local/api/v1/signout", {
-            method: "post",
-            credentials: "include",
-            body: JSON.stringify({
-              sessionId: "",
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => console.log(data));
+          const params = new URLSearchParams({
+            return_url: "https://app.example.local/app2",
+          });
 
-          reloadSessions();
+          window.location.href = `https://auth.example.local/auth/signout?${params.toString()}`;
         }}
       >
         Logout

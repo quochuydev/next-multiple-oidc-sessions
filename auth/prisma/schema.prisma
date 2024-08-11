@@ -24,11 +24,11 @@ model Session {
 
 model User {
     id                String    @id @default(uuid())
-    email             String
-    emailVerified     Boolean
-    name              String
-    sub               String
-    preferredUsername String
+    sub               String?
+    name              String?
+    preferredUsername String?
+    email             String?
+    emailVerified     Boolean?
     createdAt         DateTime  @default(now())
     Session           Session[]
 }
