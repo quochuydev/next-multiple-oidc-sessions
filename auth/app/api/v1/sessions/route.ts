@@ -4,14 +4,14 @@ import { authSessionCookieName } from "@/lib/constant";
 import { prisma } from "@/lib/prisma";
 import type { APIGetSessions } from "@/types/api";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import * as z from "zod";
 
 const schema = z.object({
-  origin: z.string().regex(configuration.originRegex),
+  origin: z.string().regex(configuration.originRegex).nullable().optional(),
 });
 
-export async function GET(request: NextRequest, res: NextResponse) {
+export async function GET(request: NextRequest) {
   return defaultHandler<APIGetSessions>(
     {
       request,
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest, res: NextResponse) {
       });
 
       const requestCookie = cookies();
+
       const authSessionCookie = requestCookie.get(authSessionCookieName);
       if (!authSessionCookie?.value) return { sessions: [] };
 

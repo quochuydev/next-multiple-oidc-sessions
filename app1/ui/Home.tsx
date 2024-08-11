@@ -25,20 +25,15 @@ export default function Home() {
         <nav aria-label="Top" className="flex items-center mx-auto">
           <div className="ml-auto h-16 flex items-center px-8">
             <ProfileImage
-              appUrl={""}
               onSelectAccount={(session) => console.log(session)}
               session={sessions[0]}
               sessions={sessions}
-              onLogout={() => {
+              signOut={(sessionId) => {
                 fetch("https://auth.example.local/api/v1/signout", {
                   method: "post",
                   credentials: "include",
-                  body: JSON.stringify({
-                    sessionId: "",
-                  }),
-                })
-                  .then((response) => response.json())
-                  .then((data) => console.log(data));
+                  body: JSON.stringify({ sessionId }),
+                }).then((response) => response.json());
 
                 reloadSessions();
               }}

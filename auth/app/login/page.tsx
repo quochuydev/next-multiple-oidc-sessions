@@ -4,10 +4,18 @@ export default async function Page({
   searchParams,
 }: {
   searchParams: {
-    returnUrl: string;
+    return_url?: string;
+    prompt?: string;
+    scope?: string;
+    login_hint?: string;
   };
 }) {
-  const { returnUrl } = searchParams;
-
-  return <Login returnUrl={returnUrl} />;
+  return (
+    <Login
+      returnUrl={searchParams.return_url}
+      prompt={searchParams.prompt}
+      scope={searchParams.scope}
+      loginHint={searchParams.login_hint}
+    />
+  );
 }

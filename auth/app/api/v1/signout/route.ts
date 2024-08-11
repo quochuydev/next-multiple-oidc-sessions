@@ -8,10 +8,17 @@ import * as z from "zod";
 const schema = z.object({
   sessionId: z.string(),
   authSession: z.string(),
-  origin: z.string().regex(configuration.originRegex),
+  origin: z.string().regex(configuration.originRegex).nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
+  const responseHeaders = {
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Origin": request.headers.get("origin") as string,
+  };
+
   try {
     const body = (await request.json()) as {
       sessionId: string;
@@ -38,29 +45,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      {},
-      {
-        status: 200,
-        headers: {
-          "Access-Control-Allow-Credentials": "true",
-          "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Origin": request.headers.get(
-            "origin"
-          ) as string,
-        },
-      }
-    );
+    return NextResponse.json({}, { status: 200, headers: responseHeaders });
   } catch (error) {
-    return NextResponse.json(error, {
-      status: 500,
-      headers: {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Origin": request.headers.get("origin") as string,
-      },
-    });
+    return NextResponse.json(error, { status: 500, headers: responseHeaders });
   }
 }

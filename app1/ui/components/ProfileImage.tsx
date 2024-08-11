@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 
 export default function ProfileImage(props: {
-  appUrl: string;
   session: any;
   sessions: any[];
   onSelectAccount: (session: any) => void;
-  onLogout: () => void;
+  signOut: (sessionId: string) => void;
 }) {
-  const { appUrl, session, sessions, onSelectAccount, onLogout } = props;
-  const router = useRouter();
+  const { session, sessions, onSelectAccount, signOut } = props;
 
   const user = {
     loginName: session?.userId,
@@ -41,43 +39,56 @@ export default function ProfileImage(props: {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute w-80 right-0 mt-3 origin-top-right divide-y divide-gray-500 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white">
+        <Menu.Items className="absolute w-80 right-0 mt-3 origin-top-right divide-y divide-gray-500 rounded-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white">
           <div className="flex flex-col items-center py-4 px-1">
             <p>{user.loginName}</p>
             <p className="text-sm">{user.displayName}</p>
           </div>
 
-          <div className="px-1 py-1 max-h-96 overflow-y-auto">
-            {sessions?.map((session, i: number) => (
-              <Menu.Item key={session?.userId}>
-                {() => (
-                  <button
-                    onClick={() => onSelectAccount(session)}
-                    className={`group flex rounded-md items-center w-full px-2 py-2 text-sm`}
-                  >
-                    <div className="w-8 h-8 mr-2 flex items-center justify-center rounded-full bg-black bg-opacity-20">
-                      <span className="text-sm">
-                        {session ? session.userId?.substring(0, 1) : "A"}
-                      </span>
-                    </div>
+          {sessions?.map((session, i: number) => (
+            <Menu.Item key={session?.userId}>
+              {() => (
+                <button
+                  onClick={() => onSelectAccount(session)}
+                  className={`group flex items-center w-full px-2 py-2 text-sm`}
+                >
+                  <div className="w-8 h-8 mr-2 flex items-center justify-center rounded-full bg-black bg-opacity-20">
+                    <span className="text-sm">
+                      {session ? session.userId?.substring(0, 1) : "A"}
+                    </span>
+                  </div>
 
-                    <div className="flex flex-col justify-star text-left">
-                      <span>{session?.userId}</span>
-                      <span className="text-xs">{session?.userId}</span>
-                    </div>
-                  </button>
-                )}
-              </Menu.Item>
-            ))}
-          </div>
+                  <div className="flex flex-col justify-star text-left">
+                    <span>{session?.userId}</span>
+                    <span className="text-xs">{session?.userId}</span>
+                  </div>
+                </button>
+              )}
+            </Menu.Item>
+          ))}
 
           <Menu.Item>
             {() => (
               <button
-                className={`group flex rounded-md justify-center items-center w-full px-2 py-2 text-sm`}
+                className={`group flex justify-center items-center w-full px-2 py-2 text-sm`}
                 onClick={() => {
-                  window.location.href =
-                    "https://auth.example.local/login?returnUrl=https://app.example.local/app1&prompt=login";
+                  const params = new URLSearchParams({
+                    // login_hint: 'username',
+                    prompt: "select_account",
+                    scope: [
+                      "openid",
+                      "userinfo",
+                      "email",
+                      "profile",
+                      "address",
+                      "offline_access",
+                      "urn:zitadel:iam:user:resourceowner",
+                      "urn:zitadel:iam:org:project:id:zitadel:aud",
+                    ].join(" "),
+                    return_url: "https://app.example.local/app1",
+                  });
+
+                  window.location.href = `https://auth.example.local/login?${params.toString()}`;
                 }}
               >
                 + Add other account
@@ -88,8 +99,8 @@ export default function ProfileImage(props: {
           <Menu.Item>
             {() => (
               <button
-                className={`group flex rounded-md justify-center items-center w-full px-2 py-2 text-sm`}
-                onClick={onLogout}
+                className={`group flex justify-center items-center w-full px-2 py-2 text-sm`}
+                onClick={() => signOut(session.id)}
               >
                 Logout
               </button>

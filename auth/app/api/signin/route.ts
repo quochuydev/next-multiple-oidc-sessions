@@ -12,16 +12,20 @@ import {
   returnUrlCookieName,
   stateCookieName,
 } from "@/lib/constant";
+import { deleteCookie, setShortLiveCookie } from "@/lib/cookie";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { URLSearchParams } from "url";
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as {
-    returnUrl: string;
     csrfToken: string;
+    scope: string;
+    returnUrl?: string;
+    prompt?: string;
+    loginHint?: string;
   };
-  const { returnUrl, csrfToken } = body;
+  const { csrfToken, scope, returnUrl, prompt, loginHint } = body;
 
   const requestCookie = cookies();
 
@@ -34,84 +38,40 @@ export async function POST(request: NextRequest) {
   const codeChallenge = generateCodeChallenge(codeVerifier);
   const state = generateState();
 
-  const params = {
+  const params: {
+    code_challenge: string;
+    code_challenge_method: string;
+    client_id: string;
+    redirect_uri: string;
+    response_type: string;
+    scope: string;
+    state: string;
+    prompt?: string;
+    login_hint?: string;
+  } = {
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
     client_id: configuration.portal.clientId,
     redirect_uri: configuration.portal.redirectUrl,
     response_type: "code",
-    scope: [
-      "openid",
-      "userinfo",
-      "email",
-      "profile",
-      "address",
-      "offline_access",
-      "urn:zitadel:iam:user:resourceowner",
-      "urn:zitadel:iam:org:project:id:zitadel:aud",
-    ].join(" "),
-    code_challenge: codeChallenge,
-    code_challenge_method: "S256",
+    scope,
     state,
   };
 
-  const authorizeUrl = `${
+  if (prompt) params.prompt = prompt;
+  if (loginHint) params.login_hint = loginHint;
+
+  const authorizeUrl = new URL(
+    `/oauth/v2/authorize?${new URLSearchParams(params).toString()}`,
     configuration.portal.issuer
-  }/oauth/v2/authorize?${new URLSearchParams(params).toString()}`;
+  ).toString();
 
-  requestCookie.set({
-    name: returnUrlCookieName,
-    value: returnUrl,
-    maxAge: 5 * 60, // 5m
-    domain: new URL(configuration.appUrl).hostname,
-    sameSite: "strict",
-    path: "/",
-    httpOnly: configuration.cookie.httpOnly,
-    secure: configuration.cookie.secure,
-  });
+  setShortLiveCookie(stateCookieName, state);
+  setShortLiveCookie(redirectUrlCookieName, configuration.portal.redirectUrl);
+  setShortLiveCookie(codeVerifierCookieName, codeVerifier);
+  if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
 
-  requestCookie.set({
-    name: stateCookieName,
-    value: state,
-    maxAge: 5 * 60, // 5m
-    domain: new URL(configuration.appUrl).hostname,
-    sameSite: "strict",
-    path: "/",
-    httpOnly: configuration.cookie.httpOnly,
-    secure: configuration.cookie.secure,
-  });
+  deleteCookie(csrfTokenCookieName);
 
-  requestCookie.set({
-    name: redirectUrlCookieName,
-    value: configuration.portal.redirectUrl,
-    maxAge: 5 * 60, // 5m
-    domain: new URL(configuration.appUrl).hostname,
-    sameSite: "strict",
-    path: "/",
-    httpOnly: configuration.cookie.httpOnly,
-    secure: configuration.cookie.secure,
-  });
-
-  requestCookie.set({
-    name: codeVerifierCookieName,
-    value: codeVerifier,
-    sameSite: "strict",
-    path: "/",
-    domain: new URL(configuration.appUrl).hostname,
-    httpOnly: configuration.cookie.httpOnly,
-    secure: configuration.cookie.secure,
-    maxAge: 5 * 60, // 5m
-  });
-
-  requestCookie.set({
-    name: csrfTokenCookieName,
-    value: "",
-    sameSite: "strict",
-    path: "/",
-    domain: new URL(configuration.appUrl).hostname,
-    httpOnly: configuration.cookie.httpOnly,
-    secure: configuration.cookie.secure,
-    maxAge: 0,
-  });
-
-  console.log("authorizeUrl:", authorizeUrl);
   return NextResponse.json({ authorizeUrl });
 }

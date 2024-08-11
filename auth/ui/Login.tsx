@@ -1,30 +1,38 @@
 "use client";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function Home({ returnUrl }: { returnUrl: string }) {
+export default function Login(props: {
+  returnUrl?: string;
+  prompt?: string;
+  scope?: string;
+  loginHint?: string;
+}) {
+  const { returnUrl, prompt, scope, loginHint } = props;
+  const router = useRouter();
+
   useEffect(() => {
     fetch(`https://auth.example.local/api/csrf`, {
       method: "GET",
     })
       .then((response) => response.json())
-      .then((data) => {
-        if (data.csrfToken) {
-          fetch(`https://auth.example.local/api/signin`, {
+      .then(async ({ csrfToken }) => {
+        if (csrfToken) {
+          const result = await fetch(`https://auth.example.local/api/signin`, {
             method: "POST",
             body: JSON.stringify({
-              csrfToken: data.csrfToken,
+              csrfToken,
               returnUrl,
+              prompt,
+              scope,
+              loginHint,
             }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.authorizeUrl) {
-                window.location.href = data.authorizeUrl;
-              }
-            });
+          }).then((response) => response.json());
+
+          if (result.authorizeUrl) router.replace(result.authorizeUrl);
         }
       });
-  }, [returnUrl]);
+  }, [loginHint, prompt, returnUrl, router, scope]);
 
   return <div>Loading...</div>;
 }

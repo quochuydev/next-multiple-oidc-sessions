@@ -1,12 +1,13 @@
 import configuration from "@/configuration";
 import { SignalError } from "@/lib/bytes";
 import {
+  authSessionCookieName,
   codeVerifierCookieName,
   redirectUrlCookieName,
   returnUrlCookieName,
-  authSessionCookieName,
   stateCookieName,
 } from "@/lib/constant";
+import { deleteCookie, setAuthSessionCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
@@ -21,16 +22,17 @@ async function handler(request: NextRequest) {
 
     const requestCookie = cookies();
     const returnUrlCookie = requestCookie.get(returnUrlCookieName);
-
+    const authSessionCookie = requestCookie.get(authSessionCookieName);
     const codeVerifierCookie = requestCookie.get(codeVerifierCookieName);
+    const stateCookie = requestCookie.get(stateCookieName);
+    const redirectCookie = requestCookie.get(redirectUrlCookieName);
+
     if (!codeVerifierCookie)
       throw new SignalError("Code verifier cookie not found");
 
-    const stateCookie = requestCookie.get(stateCookieName);
     if (!stateCookie) throw new SignalError("State cookie not found");
     if (stateCookie.value !== state) throw new SignalError("Invalid state");
 
-    const redirectCookie = requestCookie.get(redirectUrlCookieName);
     if (!redirectCookie) throw new SignalError("Redirect url cookie not found");
     if (redirectCookie.value !== configuration.portal.redirectUrl)
       throw new SignalError("Invalid redirect url");
@@ -72,6 +74,8 @@ async function handler(request: NextRequest) {
       id_token: string;
     };
 
+    console.log(`debug:result`, result);
+
     if (response.status !== 200) {
       throw new SignalError(result, wellKnownResponse.status);
     }
@@ -85,7 +89,6 @@ async function handler(request: NextRequest) {
       accessToken: result.access_token,
     });
 
-    const authSessionCookie = requestCookie.get(authSessionCookieName);
     const authSession = authSessionCookie ? authSessionCookie.value : uuid();
 
     await prisma.userSession.updateMany({
@@ -110,66 +113,17 @@ async function handler(request: NextRequest) {
       },
     });
 
-    requestCookie.set({
-      name: authSessionCookieName,
-      value: authSession,
-      sameSite: "lax",
-      path: "/",
-      domain: configuration.domain,
-      httpOnly: configuration.cookie.httpOnly,
-      secure: configuration.cookie.secure,
-      maxAge: 30 * 24 * 60 * 60, // 30d
-    });
-
-    requestCookie.set({
-      name: returnUrlCookieName,
-      value: "",
-      maxAge: 0,
-      domain: new URL(configuration.appUrl).hostname,
-      sameSite: "strict",
-      path: "/",
-      httpOnly: configuration.cookie.httpOnly,
-      secure: configuration.cookie.secure,
-    });
-
-    requestCookie.set({
-      name: stateCookieName,
-      value: "",
-      maxAge: 0,
-      domain: new URL(configuration.appUrl).hostname,
-      sameSite: "strict",
-      path: "/",
-      httpOnly: configuration.cookie.httpOnly,
-      secure: configuration.cookie.secure,
-    });
-
-    requestCookie.set({
-      name: redirectUrlCookieName,
-      value: "",
-      maxAge: 0,
-      domain: new URL(configuration.appUrl).hostname,
-      sameSite: "strict",
-      path: "/",
-      httpOnly: configuration.cookie.httpOnly,
-      secure: configuration.cookie.secure,
-    });
-
-    requestCookie.set({
-      name: codeVerifierCookieName,
-      value: "",
-      maxAge: 0,
-      domain: new URL(configuration.appUrl).hostname,
-      sameSite: "strict",
-      path: "/",
-      httpOnly: configuration.cookie.httpOnly,
-      secure: configuration.cookie.secure,
-    });
+    setAuthSessionCookie(authSessionCookieName, authSession);
+    deleteCookie(returnUrlCookieName);
+    deleteCookie(stateCookieName);
+    deleteCookie(redirectUrlCookieName);
+    deleteCookie(codeVerifierCookieName);
 
     const redirectUrl = returnUrlCookie?.value || configuration.appUrl;
     return NextResponse.redirect(redirectUrl);
   } catch (error: any) {
     console.error("Error exchanging code for token:", error);
-    return NextResponse.json(error.toJSON(), { status: error.code });
+    return NextResponse.json(error, { status: error.code });
   }
 }
 
