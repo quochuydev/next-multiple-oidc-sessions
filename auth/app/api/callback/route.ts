@@ -52,6 +52,7 @@ async function handler(request: NextRequest) {
       issuer: string;
       token_endpoint: string;
       userinfo_endpoint: string;
+      end_session_endpoint: string;
     };
 
     if (wellKnownResponse.status !== 200) {

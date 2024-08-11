@@ -1,4 +1,5 @@
 import configuration from "@/configuration";
+import { SignalError } from "@/lib/bytes";
 import { authSessionCookieName } from "@/lib/constant";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
@@ -35,15 +36,42 @@ export async function POST(request: NextRequest) {
       origin: request.headers.get("origin") as string,
     });
 
-    await prisma.userSession.updateMany({
+    const session = await prisma.userSession.findFirst({
       where: {
         id: body.sessionId,
-        authSession,
+      },
+    });
+
+    if (!session) throw new Error("Session not found");
+    if (session.authSession !== authSession) throw new Error("Invalid session");
+
+    await prisma.userSession.updateMany({
+      where: {
+        id: session.id,
       },
       data: {
         deletedAt: new Date(),
       },
     });
+
+    if (session.idToken) {
+      const wellKnownResponse = await fetch(
+        `${configuration.portal.issuer}/.well-known/openid-configuration`
+      );
+
+      const wellKnown = (await wellKnownResponse.json()) as {
+        issuer: string;
+        token_endpoint: string;
+        userinfo_endpoint: string;
+        end_session_endpoint: string;
+      };
+
+      if (wellKnown.end_session_endpoint) {
+        await fetch(
+          `${wellKnown.end_session_endpoint}?id_token_hint=${session.idToken}`
+        );
+      }
+    }
 
     return NextResponse.json({}, { status: 200, headers: responseHeaders });
   } catch (error) {

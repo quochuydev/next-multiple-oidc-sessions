@@ -28,8 +28,8 @@ export default function Home() {
               onSelectAccount={(session) => console.log(session)}
               session={sessions[0]}
               sessions={sessions}
-              signOut={(sessionId) => {
-                fetch("https://auth.example.local/api/v1/signout", {
+              signOut={async (sessionId) => {
+                await fetch("https://auth.example.local/api/v1/signout", {
                   method: "post",
                   credentials: "include",
                   body: JSON.stringify({ sessionId }),
