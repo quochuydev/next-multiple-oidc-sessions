@@ -3,7 +3,6 @@ import {
   generateCodeChallenge,
   generateCodeVerifier,
   generateState,
-  SignalError,
 } from "@/lib/bytes";
 import {
   codeVerifierCookieName,
@@ -30,9 +29,8 @@ export async function POST(request: NextRequest) {
   const requestCookie = cookies();
 
   const csrfTokenCookie = requestCookie.get(csrfTokenCookieName);
-  if (!csrfTokenCookie) throw new SignalError("csrfToken cookie not found");
-  if (csrfTokenCookie.value !== csrfToken)
-    throw new SignalError("Invalid state");
+  if (!csrfTokenCookie) throw new Error("csrfToken cookie not found");
+  if (csrfTokenCookie.value !== csrfToken) throw new Error("Invalid csrfToken");
 
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
@@ -66,11 +64,10 @@ export async function POST(request: NextRequest) {
     configuration.portal.issuer
   ).toString();
 
+  if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
   setShortLiveCookie(stateCookieName, state);
   setShortLiveCookie(redirectUrlCookieName, configuration.portal.redirectUrl);
   setShortLiveCookie(codeVerifierCookieName, codeVerifier);
-  if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
-
   deleteCookie(csrfTokenCookieName);
 
   return NextResponse.json({ authorizeUrl });

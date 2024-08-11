@@ -1,5 +1,4 @@
 import configuration from "@/configuration";
-import { SignalError } from "@/lib/bytes";
 import { authSessionCookieName } from "@/lib/constant";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
@@ -36,7 +35,7 @@ export async function POST(request: NextRequest) {
       origin: request.headers.get("origin") as string,
     });
 
-    const session = await prisma.userSession.findFirst({
+    const session = await prisma.session.findFirst({
       where: {
         id: body.sessionId,
       },
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (!session) throw new Error("Session not found");
     if (session.authSession !== authSession) throw new Error("Invalid session");
 
-    await prisma.userSession.updateMany({
+    await prisma.session.updateMany({
       where: {
         id: session.id,
       },

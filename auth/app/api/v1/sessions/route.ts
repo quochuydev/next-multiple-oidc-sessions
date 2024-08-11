@@ -1,6 +1,7 @@
 import configuration from "@/configuration";
 import { authSessionCookieName } from "@/lib/constant";
 import { prisma } from "@/lib/prisma";
+import { User } from "@prisma/client";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import * as z from "zod";
@@ -26,17 +27,30 @@ export async function GET(request: NextRequest) {
     const authSessionCookie = requestCookie.get(authSessionCookieName);
 
     const sessions = authSessionCookie?.value
-      ? await prisma.userSession.findMany({
+      ? await prisma.session.findMany({
           where: {
             authSession: authSessionCookie.value,
             deletedAt: null,
+          },
+          include: {
+            user: true,
           },
         })
       : [];
 
     return NextResponse.json(
       {
-        sessions,
+        sessions: sessions.map((session) => ({
+          id: session.id,
+          authSession: session.authSession,
+          issuer: session.issuer,
+          tokenType: session.tokenType,
+          accessToken: session.accessToken,
+          expiresIn: session.expiresIn,
+          refreshToken: session.refreshToken,
+          user: transformUser(session.user),
+          idToken: session.idToken,
+        })),
       },
       {
         status: 200,
@@ -54,4 +68,16 @@ export async function GET(request: NextRequest) {
       }
     );
   }
+}
+
+function transformUser(user: Partial<User | null>) {
+  if (!user) return null;
+
+  return {
+    sub: user.sub,
+    email: user.email,
+    emailVerified: user.emailVerified,
+    name: user.name,
+    preferredUsername: user.preferredUsername,
+  };
 }

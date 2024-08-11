@@ -1,5 +1,4 @@
 import configuration from "@/configuration";
-import { SignalError } from "@/lib/bytes";
 import {
   authSessionCookieName,
   codeVerifierCookieName,
@@ -27,15 +26,14 @@ async function handler(request: NextRequest) {
     const stateCookie = requestCookie.get(stateCookieName);
     const redirectCookie = requestCookie.get(redirectUrlCookieName);
 
-    if (!codeVerifierCookie)
-      throw new SignalError("Code verifier cookie not found");
+    if (!codeVerifierCookie) throw new Error("Code verifier cookie not found");
 
-    if (!stateCookie) throw new SignalError("State cookie not found");
-    if (stateCookie.value !== state) throw new SignalError("Invalid state");
+    if (!stateCookie) throw new Error("State cookie not found");
+    if (stateCookie.value !== state) throw new Error("Invalid state");
 
-    if (!redirectCookie) throw new SignalError("Redirect url cookie not found");
+    if (!redirectCookie) throw new Error("Redirect url cookie not found");
     if (redirectCookie.value !== configuration.portal.redirectUrl)
-      throw new SignalError("Invalid redirect url");
+      throw new Error("Invalid redirect url");
 
     const tokenParams = new URLSearchParams();
     tokenParams.append("code", code as string);
@@ -56,7 +54,7 @@ async function handler(request: NextRequest) {
     };
 
     if (wellKnownResponse.status !== 200) {
-      throw new SignalError(wellKnown, wellKnownResponse.status);
+      throw { code: wellKnownResponse.status, details: wellKnown };
     }
 
     const response = await fetch(wellKnown.token_endpoint, {
@@ -64,7 +62,7 @@ async function handler(request: NextRequest) {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: tokenParams,
+      body: tokenParams as BodyInit,
     });
 
     const result = (await response.json()) as {
@@ -75,16 +73,11 @@ async function handler(request: NextRequest) {
       id_token: string;
     };
 
-    console.log(`debug:result`, result);
-
     if (response.status !== 200) {
-      throw new SignalError(result, wellKnownResponse.status);
+      throw { code: response.status, details: result };
     }
 
-    console.log(`status:`, response.status);
-    console.log(`debug:result`, result);
-
-    const userId = await getOAuthUserId({
+    const userInfo = await getOAuthUserInfo({
       userinfoEndpoint: wellKnown.userinfo_endpoint,
       idToken: result.id_token,
       accessToken: result.access_token,
@@ -92,25 +85,33 @@ async function handler(request: NextRequest) {
 
     const authSession = authSessionCookie ? authSessionCookie.value : uuid();
 
-    await prisma.userSession.updateMany({
+    await prisma.session.updateMany({
       where: {
         authSession,
-        userId,
+        sub: userInfo.sub,
       },
       data: {
         deletedAt: new Date(),
       },
     });
 
-    await prisma.userSession.create({
+    const user = await upsertUser(userInfo);
+
+    await prisma.session.create({
       data: {
         authSession,
-        userId,
+        issuer: wellKnown.issuer,
         accessToken: result.access_token,
         tokenType: result.token_type,
         expiresIn: result.expires_in,
         refreshToken: result.refresh_token,
         idToken: result.id_token,
+        sub: userInfo.sub,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
       },
     });
 
@@ -124,13 +125,16 @@ async function handler(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   } catch (error: any) {
     console.error("Error exchanging code for token:", error);
-    return NextResponse.json(error, { status: error.code });
+
+    return NextResponse.json(error.details || { message: error.message }, {
+      status: error.code,
+    });
   }
 }
 
 export { handler as GET, handler as POST };
 
-async function getOAuthUserId(params: {
+async function getOAuthUserInfo(params: {
   userinfoEndpoint: string;
   idToken: string;
   accessToken: string;
@@ -139,8 +143,13 @@ async function getOAuthUserId(params: {
 
   if (idToken) {
     const decodedIdToken = jwt.decode(idToken);
-    console.log(`debug:decodedIdToken`, decodedIdToken);
-    return decodedIdToken ? (decodedIdToken.sub as string) : null;
+    return decodedIdToken as {
+      sub: string;
+      email: string;
+      email_verified: boolean;
+      name: string;
+      preferred_username: string;
+    };
   }
 
   const userInfo = await fetch(userinfoEndpoint, {
@@ -149,6 +158,54 @@ async function getOAuthUserId(params: {
     },
   }).then((res) => res.json());
 
-  console.log(`debug:userInfo`, userInfo);
-  return userInfo.sub;
+  return userInfo as {
+    sub: string;
+    email: string;
+    email_verified: boolean;
+    name: string;
+    preferred_username: string;
+  };
+}
+
+async function upsertUser(userInfo: {
+  sub: string;
+  email: string;
+  email_verified: boolean;
+  name: string;
+  preferred_username: string;
+}) {
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      sub: userInfo.sub,
+    },
+  });
+
+  if (!existingUser) {
+    const user = await prisma.user.create({
+      data: {
+        sub: userInfo.sub,
+        email: userInfo.email,
+        emailVerified: userInfo.email_verified,
+        name: userInfo.name,
+        preferredUsername: userInfo.preferred_username,
+      },
+    });
+
+    return user;
+  }
+
+  await prisma.user.update({
+    where: {
+      id: existingUser.id,
+    },
+    data: {
+      sub: userInfo.sub,
+      email: userInfo.email,
+      emailVerified: userInfo.email_verified,
+      name: userInfo.name,
+      preferredUsername: userInfo.preferred_username,
+    },
+  });
+
+  return existingUser;
 }

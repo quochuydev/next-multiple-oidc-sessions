@@ -7,15 +7,28 @@ generator client {
     provider = "prisma-client-js"
 }
 
-model UserSession {
+model Session {
     id           String    @id @default(uuid())
     authSession  String
-    userId       String?
+    issuer       String
     accessToken  String
     tokenType    String
     expiresIn    Int //miliseconds
     refreshToken String?
     idToken      String?
+    userId       String?
+    user         User?     @relation(fields: [userId], references: [id])
     createdAt    DateTime  @default(now())
     deletedAt    DateTime?
+}
+
+model User {
+    id                String    @id @default(uuid())
+    email             String
+    emailVerified     Boolean
+    name              String
+    sub               String
+    preferredUsername String
+    createdAt         DateTime  @default(now())
+    Session           Session[]
 }

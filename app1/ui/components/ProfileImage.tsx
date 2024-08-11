@@ -2,6 +2,7 @@
 "use client";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProfileImage(props: {
   session: any;
@@ -10,6 +11,7 @@ export default function ProfileImage(props: {
   signOut: (sessionId: string) => void;
 }) {
   const { session, sessions, onSelectAccount, signOut } = props;
+  const router = useRouter();
 
   const user = {
     loginName: session?.userId,
@@ -44,11 +46,14 @@ export default function ProfileImage(props: {
             <p className="text-sm">{user.displayName}</p>
           </div>
 
-          {sessions?.map((session, i: number) => (
+          {sessions?.map((session, index: number) => (
             <Menu.Item key={session?.userId}>
               {() => (
                 <button
-                  onClick={() => onSelectAccount(session)}
+                  onClick={() => {
+                    // onSelectAccount(session);
+                    router.push(`/account/${index}`);
+                  }}
                   className={`group flex items-center w-full px-2 py-2 text-sm`}
                 >
                   <div className="w-8 h-8 mr-2 flex items-center justify-center rounded-full bg-black bg-opacity-20">

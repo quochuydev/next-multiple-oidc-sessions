@@ -21,19 +21,3 @@ function base64URLEncode(str: Buffer) {
     .replace(/\//g, "_")
     .replace(/=/g, "");
 }
-
-export class SignalError extends Error {
-  code?: number;
-
-  constructor(error: any, code?: number) {
-    super(error);
-    this.code = code || 500;
-    Object.setPrototypeOf(this, SignalError.prototype);
-  }
-
-  toJSON() {
-    return {
-      message: this.message,
-    };
-  }
-}
