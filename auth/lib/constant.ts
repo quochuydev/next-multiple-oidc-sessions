@@ -1,4 +1,4 @@
-export const sessionCookieName = "auth-session";
+export const authSessionCookieName = "auth-session";
 export const returnUrlCookieName = "__Secure-next-auth.return-url";
 export const redirectUrlCookieName = "__Secure-next-auth.callback-url";
 export const stateCookieName = "__Secure-next-auth.state";

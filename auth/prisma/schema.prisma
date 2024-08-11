@@ -9,7 +9,7 @@ generator client {
 
 model UserSession {
     id           String    @id @default(uuid())
-    sessionId    String
+    authSession  String
     userId       String?
     accessToken  String
     tokenType    String

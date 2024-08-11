@@ -4,7 +4,7 @@ export type APIGetSessions = {
   data: {
     sessions: Array<{
       id: string;
-      sessionId: string;
+      authSession: string;
       userId: string | null;
       accessToken: string;
       tokenType: string;
@@ -13,5 +13,13 @@ export type APIGetSessions = {
       idToken: string | null;
       createdAt: Date;
     }>;
+  };
+};
+
+export type APISignOut = {
+  url: "/api/v1/signout";
+  method: "post";
+  data: {
+    sessionId: string;
   };
 };

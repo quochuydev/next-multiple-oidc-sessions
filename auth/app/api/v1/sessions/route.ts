@@ -1,6 +1,6 @@
 import configuration from "@/configuration";
 import { defaultHandler } from "@/lib/api-handler";
-import { sessionCookieName } from "@/lib/constant";
+import { authSessionCookieName } from "@/lib/constant";
 import { prisma } from "@/lib/prisma";
 import type { APIGetSessions } from "@/types/api";
 import { cookies } from "next/headers";
@@ -28,14 +28,12 @@ export async function GET(request: NextRequest, res: NextResponse) {
       });
 
       const requestCookie = cookies();
-      const sessionCookie = requestCookie.get(sessionCookieName);
-
-      const sessionId = sessionCookie ? sessionCookie.value : undefined;
-      if (!sessionId) return { sessions: [] };
+      const authSessionCookie = requestCookie.get(authSessionCookieName);
+      if (!authSessionCookie?.value) return { sessions: [] };
 
       const sessions = await prisma.userSession.findMany({
         where: {
-          sessionId,
+          authSession: authSessionCookie.value,
           deletedAt: null,
         },
       });

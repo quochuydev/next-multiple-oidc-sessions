@@ -1,3 +1,13 @@
+## Flows
+
+https://app.example.local/app1
+
+https://app.example.local/app2
+
+https://auth.example.local
+
+https://zitadel-login-ui-v2.vercel.app
+
 ## Commands
 
 ### Pre-Dev 🙌
@@ -51,13 +61,3 @@ task up
 ### Dev 👉
 
 `task dev`
-
-## Flows
-
-https://app.example.local/app1
-
-https://app.example.local/app2
-
-https://auth.example.local
-
-https://zitadel-login-ui-v2.vercel.app

@@ -5,6 +5,10 @@ export default function Home() {
   const [sessions, setSessions] = useState([]);
 
   useEffect(() => {
+    reloadSessions();
+  }, []);
+
+  function reloadSessions() {
     fetch("https://auth.example.local/api/v1/sessions", {
       method: "GET",
       credentials: "include",
@@ -12,7 +16,7 @@ export default function Home() {
       .then((response) => response.json())
       .then((data) => (data.sessions ? data.sessions : []))
       .then((data) => setSessions(data));
-  }, []);
+  }
 
   return (
     <div>
@@ -25,8 +29,18 @@ export default function Home() {
         Login
       </button>
       <button
-        onClick={() => {
-          //
+        onClick={async () => {
+          fetch("https://auth.example.local/api/v1/signout", {
+            method: "post",
+            credentials: "include",
+            body: JSON.stringify({
+              sessionId: "",
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => console.log(data));
+
+          reloadSessions();
         }}
       >
         Logout

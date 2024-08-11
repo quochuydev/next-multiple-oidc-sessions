@@ -4,7 +4,7 @@ import {
   codeVerifierCookieName,
   redirectUrlCookieName,
   returnUrlCookieName,
-  sessionCookieName,
+  authSessionCookieName,
   stateCookieName,
 } from "@/lib/constant";
 import { prisma } from "@/lib/prisma";
@@ -85,12 +85,12 @@ async function handler(request: NextRequest) {
       accessToken: result.access_token,
     });
 
-    const sessionCookie = requestCookie.get(sessionCookieName);
-    const sessionId = sessionCookie ? sessionCookie.value : uuid();
+    const authSessionCookie = requestCookie.get(authSessionCookieName);
+    const authSession = authSessionCookie ? authSessionCookie.value : uuid();
 
     await prisma.userSession.updateMany({
       where: {
-        sessionId,
+        authSession,
         userId,
       },
       data: {
@@ -100,7 +100,7 @@ async function handler(request: NextRequest) {
 
     await prisma.userSession.create({
       data: {
-        sessionId,
+        authSession,
         userId,
         accessToken: result.access_token,
         tokenType: result.token_type,
@@ -111,8 +111,8 @@ async function handler(request: NextRequest) {
     });
 
     requestCookie.set({
-      name: sessionCookieName,
-      value: sessionId,
+      name: authSessionCookieName,
+      value: authSession,
       sameSite: "lax",
       path: "/",
       domain: configuration.domain,
