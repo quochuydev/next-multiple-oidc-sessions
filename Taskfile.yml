@@ -3,10 +3,6 @@
 version: "3"
 
 tasks:
-  default:
-    desc: Run all apps in dev mode
-    deps:
-      - dev
   dev:
     desc: Run all apps in dev mode
     deps:

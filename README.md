@@ -1,6 +1,16 @@
 ## Flows
 
-![next-multiple-oidc-sessions.drawio.png](docs/next-multiple-oidc-sessions.drawio.png)
+### Authentication
+
+![authentication.png](docs/authentication.png)
+
+### Authorization
+
+![authorization.png](docs/authorization.png)
+
+### End session
+
+![end_session.png](docs/end_session.png)
 
 ## Commands
 
@@ -54,4 +64,10 @@ task up
 
 ### Dev 👉
 
-`task dev`
+```
+task dev
+```
+
+## Deploy
+
+### Setup AWS EC2
