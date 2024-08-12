@@ -1,12 +1,6 @@
 ## Flows
 
-https://app.example.local/app1
-
-https://app.example.local/app2
-
-https://auth.example.local
-
-https://zitadel-login-ui-v2.vercel.app
+![next-multiple-oidc-sessions.drawio.png](docs/next-multiple-oidc-sessions.drawio.png)
 
 ## Commands
 
