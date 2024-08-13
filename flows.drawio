@@ -1,10 +1,10 @@
 <mxfile host="65bd71144e" pages="3">
     <diagram name="authentication" id="52a04d89-c75d-2922-d76d-85b35f80e030">
-        <mxGraphModel dx="1757" dy="1394" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+        <mxGraphModel dx="1648" dy="1308" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="UXE0n5PbbgXk-ugbQSrG-2" value="app2&lt;span style=&quot;background-color: initial;&quot;&gt;.example.local&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="UXE0n5PbbgXk-ugbQSrG-2" value="app.example.local/app2" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="620" y="220" width="160" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="UXE0n5PbbgXk-ugbQSrG-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" target="UXE0n5PbbgXk-ugbQSrG-4" edge="1">
@@ -33,8 +33,8 @@
                 <mxCell id="UXE0n5PbbgXk-ugbQSrG-20" value="/callback?code=" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="390" y="20" width="110" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="UXE0n5PbbgXk-ugbQSrG-25" value="store cookie: auth-session&lt;br&gt;SameSite: Lax; Path: /;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="380" y="155" width="160" height="40" as="geometry"/>
+                <mxCell id="UXE0n5PbbgXk-ugbQSrG-25" value="store cookie: auth-session&lt;br&gt;SameSite: Lax; Path: /;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="155" width="160" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="UXE0n5PbbgXk-ugbQSrG-33" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.584;entryY=-0.005;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.581;exitY=0.992;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="UXE0n5PbbgXk-ugbQSrG-4" target="UXE0n5PbbgXk-ugbQSrG-35" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -42,7 +42,7 @@
                         <mxPoint x="389.72" y="95.65999999999985" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="UXE0n5PbbgXk-ugbQSrG-34" value="browser cookies" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="UXE0n5PbbgXk-ugbQSrG-34" value="browser cookie storage" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="320" y="220" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="UXE0n5PbbgXk-ugbQSrG-35" value="auth.example.local" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -57,7 +57,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="UXE0n5PbbgXk-ugbQSrG-1" value="app1.example.local" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="UXE0n5PbbgXk-ugbQSrG-1" value="app.example.local/app1" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="-20" y="220" width="160" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="UXE0n5PbbgXk-ugbQSrG-47" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="UXE0n5PbbgXk-ugbQSrG-1" target="UXE0n5PbbgXk-ugbQSrG-35" edge="1">
@@ -118,7 +118,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="sj6kJow7FIS_4MH3ASW7" name="authorization">
-        <mxGraphModel dx="657" dy="544" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="876" dy="732" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -136,17 +136,17 @@
                     <mxGeometry y="520" width="160" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="G9qSIX0Mn2szh2WbC5xG-4" value="identity server" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="400" y="640" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="500" y="640" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="G9qSIX0Mn2szh2WbC5xG-5" value="auth.example.local" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="400" y="520" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="360" y="520" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="G9qSIX0Mn2szh2WbC5xG-6" value="GET /v1/sessions&lt;br&gt;cookie: auth-session&lt;br&gt;origin: *.example.local" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="210" y="490" width="140" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="G9qSIX0Mn2szh2WbC5xG-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="400" y="560" as="sourcePoint"/>
+                        <mxPoint x="360" y="560" as="sourcePoint"/>
                         <mxPoint x="160" y="560" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
@@ -160,10 +160,10 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="G9qSIX0Mn2szh2WbC5xG-9" value="select active session and authorization with /instrospect" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="80" y="640" width="320" height="30" as="geometry"/>
+                    <mxGeometry x="120" y="640" width="320" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="G9qSIX0Mn2szh2WbC5xG-10" value="introspection response" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="170" y="680" width="140" height="30" as="geometry"/>
+                    <mxGeometry x="220" y="680" width="140" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="G9qSIX0Mn2szh2WbC5xG-11" value="session list response" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="210" y="560" width="130" height="30" as="geometry"/>
@@ -172,7 +172,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="hq6KJ0LbCyb4bZhUODRr" name="end_session">
-        <mxGraphModel dx="657" dy="544" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="657" dy="549" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>

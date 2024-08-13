@@ -1,3 +1,7 @@
+# Multiple OIDC sessions
+
+Based on next-auth concept, the Auth application for managing multiple OIDC sessions.
+
 ## Flows
 
 ### Authentication
