@@ -6,15 +6,15 @@ Based on next-auth concept, the Auth application for managing multiple OIDC sess
 
 ### Authentication
 
-![authentication.png](docs/authentication.png)
+![authentication.png](docs/authentication.drawio.png)
 
 ### Authorization
 
-![authorization.png](docs/authorization.png)
+![authorization.png](docs/authorization.drawio.png)
 
 ### End session
 
-![end_session.png](docs/end_session.png)
+![end_session.png](docs/end_session.drawio.png)
 
 ## Commands
 
