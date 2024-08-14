@@ -8,8 +8,8 @@ export default function SignIn(props: {
   scope?: string;
   loginHint?: string;
 }) {
-  const { returnUrl, prompt, scope, loginHint } = props;
   const router = useRouter();
+  const { returnUrl, prompt, scope, loginHint } = props;
 
   useEffect(() => {
     fetch(`https://auth.example.local/api/auth/csrf`, {

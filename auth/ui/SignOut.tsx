@@ -2,19 +2,33 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function SignOut(props: { returnUrl?: string }) {
-  const { returnUrl } = props;
+export default function SignOut(props: {
+  returnUrl?: string;
+  idTokenHint?: string;
+  clientId?: string;
+  postLogoutRedirectUri?: string;
+  state?: string;
+}) {
+  const { returnUrl, idTokenHint, clientId, postLogoutRedirectUri, state } =
+    props;
   const router = useRouter();
 
   useEffect(() => {
     fetch(`https://auth.example.local/api/auth/signout`, {
-      method: "GET",
+      method: "POST",
+      body: JSON.stringify({
+        returnUrl,
+        idTokenHint,
+        clientId,
+        postLogoutRedirectUri,
+        state,
+      }),
     })
       .then((response) => response.json())
-      .then(async (data) => {
-        console.log(`debug:data`, data);
+      .then(({ endSessionUrl }) => {
+        if (endSessionUrl) router.replace(endSessionUrl);
       });
-  }, [returnUrl, router]);
+  }, [clientId, idTokenHint, postLogoutRedirectUri, returnUrl, router, state]);
 
   return <div>Loading...</div>;
 }

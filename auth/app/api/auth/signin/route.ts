@@ -32,6 +32,22 @@ export async function POST(request: NextRequest) {
   if (!csrfTokenCookie) throw new Error("csrfToken cookie not found");
   if (csrfTokenCookie.value !== csrfToken) throw new Error("Invalid csrfToken");
 
+  const wellKnownResponse = await fetch(
+    `${configuration.portal.issuer}/.well-known/openid-configuration`
+  );
+
+  const wellKnown = (await wellKnownResponse.json()) as {
+    issuer: string;
+    authorization_endpoint: string;
+    token_endpoint: string;
+    userinfo_endpoint: string;
+    end_session_endpoint: string;
+  };
+
+  if (wellKnownResponse.status !== 200) {
+    throw { code: wellKnownResponse.status, details: wellKnown };
+  }
+
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
   const state = generateState();
@@ -59,10 +75,9 @@ export async function POST(request: NextRequest) {
   if (prompt) params.prompt = prompt;
   if (loginHint) params.login_hint = loginHint;
 
-  const authorizeUrl = new URL(
-    `/oauth/v2/authorize?${new URLSearchParams(params).toString()}`,
-    configuration.portal.issuer
-  ).toString();
+  const authorizeUrl = `${
+    wellKnown.authorization_endpoint
+  }?${new URLSearchParams(params).toString()}`;
 
   if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
   setShortLiveCookie(stateCookieName, state);
