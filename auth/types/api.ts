@@ -1,5 +1,5 @@
 export type APIGetSessions = {
-  url: "/api/sessions";
+  url: "/api/v1/sessions";
   method: "get";
   data: {
     sessions: Array<{

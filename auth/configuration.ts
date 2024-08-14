@@ -40,7 +40,7 @@ const configuration = {
     // issuer: "https://zitadel-login-ui-v2.vercel.app",
     issuer: "https://system-v1-fpms4l.zitadel.cloud",
     clientId: "279716137237868517",
-    redirectUrl: "https://auth.example.local/api/callback",
+    redirectUrl: "https://auth.example.local/api/auth/callback",
   },
 };
 

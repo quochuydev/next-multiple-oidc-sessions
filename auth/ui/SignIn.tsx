@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Login(props: {
+export default function SignIn(props: {
   returnUrl?: string;
   prompt?: string;
   scope?: string;
@@ -12,22 +12,25 @@ export default function Login(props: {
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`https://auth.example.local/api/csrf`, {
+    fetch(`https://auth.example.local/api/auth/csrf`, {
       method: "GET",
     })
       .then((response) => response.json())
       .then(async ({ csrfToken }) => {
         if (csrfToken) {
-          const result = await fetch(`https://auth.example.local/api/signin`, {
-            method: "POST",
-            body: JSON.stringify({
-              csrfToken,
-              returnUrl,
-              prompt,
-              scope,
-              loginHint,
-            }),
-          }).then((response) => response.json());
+          const result = await fetch(
+            `https://auth.example.local/api/auth/signin`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                csrfToken,
+                returnUrl,
+                prompt,
+                scope,
+                loginHint,
+              }),
+            }
+          ).then((response) => response.json());
 
           if (result.authorizeUrl) router.replace(result.authorizeUrl);
         }

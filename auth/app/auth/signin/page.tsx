@@ -1,4 +1,4 @@
-import Login from "@/ui/Login";
+import SignIn from "@/ui/SignIn";
 
 export default async function Page({
   searchParams,
@@ -11,7 +11,7 @@ export default async function Page({
   };
 }) {
   return (
-    <Login
+    <SignIn
       returnUrl={searchParams.return_url}
       prompt={searchParams.prompt}
       scope={searchParams.scope}
