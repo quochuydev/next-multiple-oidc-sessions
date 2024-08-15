@@ -1,5 +1,5 @@
 import configuration from "@/configuration";
-import { authSessionCookieName } from "@/lib/constant";
+import { authSessionCookieName } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { User } from "@prisma/client";
 import { cookies } from "next/headers";

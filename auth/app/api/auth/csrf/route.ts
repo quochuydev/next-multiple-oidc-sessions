@@ -1,5 +1,5 @@
 import { generateCsrfToken } from "@/lib/bytes";
-import { csrfTokenCookieName } from "@/lib/constant";
+import { csrfTokenCookieName } from "@/lib/constants";
 import { setShortLiveCookie } from "@/lib/cookie";
 import { NextResponse } from "next/server";
 

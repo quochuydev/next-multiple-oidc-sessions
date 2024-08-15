@@ -9,7 +9,7 @@ import {
   redirectUrlCookieName,
   returnUrlCookieName,
   stateCookieName,
-} from "@/lib/constant";
+} from "@/lib/constants";
 import { deleteCookie, setShortLiveCookie } from "@/lib/cookie";
 import { getWellKnown } from "@/lib/zitadel";
 import { authOptions } from "@/options";

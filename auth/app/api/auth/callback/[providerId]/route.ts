@@ -5,7 +5,7 @@ import {
   redirectUrlCookieName,
   returnUrlCookieName,
   stateCookieName,
-} from "@/lib/constant";
+} from "@/lib/constants";
 import { deleteCookie, setAuthSessionCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
 import { getWellKnown } from "@/lib/zitadel";

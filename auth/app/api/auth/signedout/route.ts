@@ -1,5 +1,5 @@
 import configuration from "@/configuration";
-import { returnUrlCookieName } from "@/lib/constant";
+import { returnUrlCookieName } from "@/lib/constants";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 

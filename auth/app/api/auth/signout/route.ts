@@ -1,5 +1,5 @@
 import configuration from "@/configuration";
-import { authSessionCookieName, returnUrlCookieName } from "@/lib/constant";
+import { authSessionCookieName, returnUrlCookieName } from "@/lib/constants";
 import { setShortLiveCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
 import { getWellKnown } from "@/lib/zitadel";
