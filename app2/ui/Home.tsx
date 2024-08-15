@@ -37,7 +37,7 @@ export default function Home() {
             return_url: "https://app.example.local/app2",
           });
 
-          window.location.href = `https://auth.example.local/auth/signin/zitadel?${params}`;
+          window.location.href = `https://auth.example.local/auth/signin/portal?${params}`;
         }}
       >
         Login
@@ -52,7 +52,7 @@ export default function Home() {
             params.set("id_token_hint", sessions[0].idToken);
           }
 
-          window.location.href = `https://auth.example.local/auth/signout/zitadel?${params}`;
+          window.location.href = `https://auth.example.local/auth/signout/portal?${params}`;
         }}
       >
         Logout

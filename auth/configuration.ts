@@ -24,16 +24,19 @@ const schema = z.object({
   portal: z.object({
     clientId: z.string(),
     issuer: z.string(),
+    redirectUrl: z.string(),
   }),
   zitadel: z.object({
     clientId: z.string(),
+    redirectUrl: z.string(),
     issuer: z.string(),
   }),
-  redirectUrl: z.string(),
   postLogoutRedirectUri: z.string(),
 });
 
-const configuration = {
+type Configuration = z.infer<typeof schema>;
+
+const configuration: Configuration = {
   appUrl: "https://auth.example.local",
   domain: "example.local",
   originRegex: /^(.*\.)?(example\.local|real-domain\.com)$/,
@@ -44,12 +47,13 @@ const configuration = {
   portal: {
     issuer: "https://zitadel-login-ui-v2.vercel.app",
     clientId: "279716137237868517",
+    redirectUrl: "https://auth.example.local/api/auth/callback/portal",
   },
   zitadel: {
     issuer: "https://system-v1-fpms4l.zitadel.cloud",
     clientId: "279716137237868517",
+    redirectUrl: "https://auth.example.local/api/auth/callback/zitadel",
   },
-  redirectUrl: "https://auth.example.local/api/auth/callback",
   postLogoutRedirectUri: "https://auth.example.local/auth/signedout",
 };
 

@@ -21,6 +21,8 @@ async function handler(
   try {
     const code = request.nextUrl.searchParams.get("code");
     const state = request.nextUrl.searchParams.get("state");
+    const provider = params.provider;
+    if (!provider) throw new Error("provider not found");
 
     const requestCookie = cookies();
     const returnUrlCookie = requestCookie.get(returnUrlCookieName);
@@ -36,17 +38,14 @@ async function handler(
     if (stateCookie.value !== state) throw new Error("Invalid state");
 
     if (!redirectCookie) throw new Error("Redirect url cookie not found");
-    if (redirectCookie.value !== configuration.redirectUrl)
+    if (redirectCookie.value !== configuration[provider].redirectUrl)
       throw new Error("Invalid redirect url");
-
-    const provider = params.provider;
-    if (!provider) throw new Error("provider not found");
 
     const tokenParams = new URLSearchParams();
     tokenParams.append("code", code as string);
     tokenParams.append("grant_type", "authorization_code");
     tokenParams.append("client_id", configuration[provider].clientId);
-    tokenParams.append("redirect_uri", configuration.redirectUrl);
+    tokenParams.append("redirect_uri", configuration[provider].redirectUrl);
     tokenParams.append("code_verifier", codeVerifierCookie.value);
 
     const wellKnownResponse = await fetch(

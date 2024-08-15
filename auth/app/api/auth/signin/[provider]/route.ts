@@ -62,7 +62,7 @@ export async function POST(
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
     client_id: configuration[provider].clientId,
-    redirect_uri: configuration.redirectUrl,
+    redirect_uri: configuration[provider].redirectUrl,
     response_type: "code",
     scope,
     state,
@@ -73,10 +73,13 @@ export async function POST(
 
   if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
   setShortLiveCookie(stateCookieName, state);
-  setShortLiveCookie(redirectUrlCookieName, configuration.redirectUrl);
+  setShortLiveCookie(
+    redirectUrlCookieName,
+    configuration[provider].redirectUrl
+  );
   setShortLiveCookie(codeVerifierCookieName, codeVerifier);
   deleteCookie(csrfTokenCookieName);
 
-  const authorizeUrl = `${wellKnown.authorization_endpoint}?${params}`;
+  const authorizeUrl = `${wellKnown.authorization_endpoint}?${requestParams}`;
   return NextResponse.json({ authorizeUrl });
 }

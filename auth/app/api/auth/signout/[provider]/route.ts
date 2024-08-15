@@ -69,7 +69,7 @@ export async function POST(
 
     if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
 
-    const endSessionUrl = `${wellKnown.end_session_endpoint}?${params}`;
+    const endSessionUrl = `${wellKnown.end_session_endpoint}?${requestParams}`;
 
     return NextResponse.json({ endSessionUrl });
   } catch (error: any) {

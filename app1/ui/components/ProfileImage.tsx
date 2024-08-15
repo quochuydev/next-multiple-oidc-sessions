@@ -88,7 +88,7 @@ export default function ProfileImage(props: {
                     return_url: "https://app.example.local/app1",
                   });
 
-                  window.location.href = `https://auth.example.local/auth/signin/portal?${params}`;
+                  window.location.href = `https://auth.example.local/auth/signin/zitadel?${params}`;
                 }}
               >
                 + Add other account
@@ -109,7 +109,7 @@ export default function ProfileImage(props: {
                     params.set("id_token_hint", session.idToken);
                   }
 
-                  window.location.href = `https://auth.example.local/auth/signout/portal?${params}`;
+                  window.location.href = `https://auth.example.local/auth/signout/zitadel?${params}`;
                 }}
               >
                 Logout
