@@ -11,9 +11,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
       returnUrl?: string;
-      sessionId?: string;
+      sessionId: string;
     };
     const { sessionId, returnUrl } = body;
+    if (!sessionId) throw new Error("invalid sessionId");
 
     const requestCookie = cookies();
     const authSessionCookie = requestCookie.get(authSessionCookieName);

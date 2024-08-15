@@ -10,11 +10,11 @@ export default async function Page({
     scope?: string;
     login_hint?: string;
   };
-  params: { provider: string };
+  params: { providerId: string };
 }) {
   return (
     <SignIn
-      provider={params.provider}
+      provider={params.providerId}
       returnUrl={searchParams.return_url}
       prompt={searchParams.prompt}
       scope={searchParams.scope}
