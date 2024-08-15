@@ -8,9 +8,8 @@ export default function ProfileImage(props: {
   session: any;
   sessions: any[];
   onSelectAccount: (session: any) => void;
-  signOut: (sessionId: string) => void;
 }) {
-  const { session, sessions, onSelectAccount, signOut } = props;
+  const { session, sessions } = props;
   const router = useRouter();
 
   const user = {
@@ -50,7 +49,6 @@ export default function ProfileImage(props: {
               {() => (
                 <button
                   onClick={() => {
-                    // onSelectAccount(session);
                     router.push(`/account/${index}`);
                   }}
                   className={`group flex items-center w-full px-2 py-2 text-sm`}
@@ -76,7 +74,6 @@ export default function ProfileImage(props: {
                 className={`group flex justify-center items-center w-full px-2 py-2 text-sm`}
                 onClick={() => {
                   const params = new URLSearchParams({
-                    // login_hint: 'username',
                     prompt: "select_account",
                     scope: [
                       "openid",
@@ -91,7 +88,7 @@ export default function ProfileImage(props: {
                     return_url: "https://app.example.local/app1",
                   });
 
-                  window.location.href = `https://auth.example.local/auth/signin?${params}`;
+                  window.location.href = `https://auth.example.local/auth/signin/portal?${params}`;
                 }}
               >
                 + Add other account
@@ -103,7 +100,17 @@ export default function ProfileImage(props: {
             {() => (
               <button
                 className={`group flex justify-center items-center w-full px-2 py-2 text-sm`}
-                onClick={() => signOut(session.id)}
+                onClick={() => {
+                  const params = new URLSearchParams({
+                    return_url: "https://app.example.local/app1",
+                  });
+
+                  if (session?.idToken) {
+                    params.set("id_token_hint", session.idToken);
+                  }
+
+                  window.location.href = `https://auth.example.local/auth/signout/portal?${params}`;
+                }}
               >
                 Logout
               </button>

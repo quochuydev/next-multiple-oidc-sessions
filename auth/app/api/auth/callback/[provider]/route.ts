@@ -14,7 +14,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { URLSearchParams } from "url";
 import { v4 as uuid } from "uuid";
 
-async function handler(request: NextRequest) {
+async function handler(
+  request: NextRequest,
+  { params }: { params: { provider: "portal" | "zitadel" } }
+) {
   try {
     const code = request.nextUrl.searchParams.get("code");
     const state = request.nextUrl.searchParams.get("state");
@@ -36,15 +39,18 @@ async function handler(request: NextRequest) {
     if (redirectCookie.value !== configuration.redirectUrl)
       throw new Error("Invalid redirect url");
 
+    const provider = params.provider;
+    if (!provider) throw new Error("provider not found");
+
     const tokenParams = new URLSearchParams();
     tokenParams.append("code", code as string);
     tokenParams.append("grant_type", "authorization_code");
-    tokenParams.append("client_id", configuration.portal.clientId);
+    tokenParams.append("client_id", configuration[provider].clientId);
     tokenParams.append("redirect_uri", configuration.redirectUrl);
     tokenParams.append("code_verifier", codeVerifierCookie.value);
 
     const wellKnownResponse = await fetch(
-      `${configuration.portal.issuer}/.well-known/openid-configuration`
+      `${configuration[provider].issuer}/.well-known/openid-configuration`
     );
 
     const wellKnown = (await wellKnownResponse.json()) as {

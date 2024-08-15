@@ -3,18 +3,25 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SignOut(props: {
+  provider: string;
   returnUrl?: string;
   idTokenHint?: string;
   clientId?: string;
   postLogoutRedirectUri?: string;
   state?: string;
 }) {
-  const { returnUrl, idTokenHint, clientId, postLogoutRedirectUri, state } =
-    props;
+  const {
+    provider,
+    returnUrl,
+    idTokenHint,
+    clientId,
+    postLogoutRedirectUri,
+    state,
+  } = props;
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`https://auth.example.local/api/auth/signout`, {
+    fetch(`https://auth.example.local/api/auth/signout/${provider}`, {
       method: "POST",
       body: JSON.stringify({
         returnUrl,
@@ -28,7 +35,15 @@ export default function SignOut(props: {
       .then(({ endSessionUrl }) => {
         if (endSessionUrl) router.replace(endSessionUrl);
       });
-  }, [clientId, idTokenHint, postLogoutRedirectUri, returnUrl, router, state]);
+  }, [
+    clientId,
+    idTokenHint,
+    postLogoutRedirectUri,
+    provider,
+    returnUrl,
+    router,
+    state,
+  ]);
 
   return <div>Loading...</div>;
 }

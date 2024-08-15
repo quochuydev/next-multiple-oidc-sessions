@@ -24,8 +24,13 @@ const schema = z.object({
   portal: z.object({
     clientId: z.string(),
     issuer: z.string(),
-    redirectUrl: z.string(),
   }),
+  zitadel: z.object({
+    clientId: z.string(),
+    issuer: z.string(),
+  }),
+  redirectUrl: z.string(),
+  postLogoutRedirectUri: z.string(),
 });
 
 const configuration = {

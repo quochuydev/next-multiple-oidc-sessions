@@ -3,13 +3,14 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SignIn(props: {
+  provider: string;
   returnUrl?: string;
   prompt?: string;
   scope?: string;
   loginHint?: string;
 }) {
   const router = useRouter();
-  const { returnUrl, prompt, scope, loginHint } = props;
+  const { provider, returnUrl, prompt, scope, loginHint } = props;
 
   useEffect(() => {
     fetch(`https://auth.example.local/api/auth/csrf`, {
@@ -19,7 +20,7 @@ export default function SignIn(props: {
       .then(async ({ csrfToken }) => {
         if (csrfToken) {
           const result = await fetch(
-            `https://auth.example.local/api/auth/signin`,
+            `https://auth.example.local/api/auth/signin/${provider}`,
             {
               method: "POST",
               body: JSON.stringify({
@@ -35,7 +36,7 @@ export default function SignIn(props: {
           if (result.authorizeUrl) router.replace(result.authorizeUrl);
         }
       });
-  }, [loginHint, prompt, returnUrl, router, scope]);
+  }, [loginHint, prompt, provider, returnUrl, router, scope]);
 
   return <div>Loading...</div>;
 }

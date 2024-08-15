@@ -16,7 +16,10 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { URLSearchParams } from "url";
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { provider: "portal" | "zitadel" } }
+) {
   const body = (await request.json()) as {
     csrfToken: string;
     scope: string;
@@ -26,6 +29,9 @@ export async function POST(request: NextRequest) {
   };
   const { csrfToken, scope, returnUrl, prompt, loginHint } = body;
 
+  const provider = params.provider;
+  if (!provider) throw new Error("provider not found");
+
   const requestCookie = cookies();
 
   const csrfTokenCookie = requestCookie.get(csrfTokenCookieName);
@@ -33,7 +39,7 @@ export async function POST(request: NextRequest) {
   if (csrfTokenCookie.value !== csrfToken) throw new Error("Invalid csrfToken");
 
   const wellKnownResponse = await fetch(
-    `${configuration.portal.issuer}/.well-known/openid-configuration`
+    `${configuration[provider].issuer}/.well-known/openid-configuration`
   );
 
   const wellKnown = (await wellKnownResponse.json()) as {
@@ -52,18 +58,18 @@ export async function POST(request: NextRequest) {
   const codeChallenge = generateCodeChallenge(codeVerifier);
   const state = generateState();
 
-  const params = new URLSearchParams({
+  const requestParams = new URLSearchParams({
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
-    client_id: configuration.portal.clientId,
+    client_id: configuration[provider].clientId,
     redirect_uri: configuration.redirectUrl,
     response_type: "code",
     scope,
     state,
   });
 
-  if (prompt) params.set("prompt", prompt);
-  if (loginHint) params.set("login_hint", loginHint);
+  if (prompt) requestParams.set("prompt", prompt);
+  if (loginHint) requestParams.set("login_hint", loginHint);
 
   if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
   setShortLiveCookie(stateCookieName, state);

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [sessions, setSessions] = useState([]);
+  const [sessions, setSessions] = useState<any[]>([]);
 
   useEffect(() => {
     reloadSessions();
@@ -37,7 +37,7 @@ export default function Home() {
             return_url: "https://app.example.local/app2",
           });
 
-          window.location.href = `https://auth.example.local/auth/signin?${params}`;
+          window.location.href = `https://auth.example.local/auth/signin/zitadel?${params}`;
         }}
       >
         Login
@@ -48,7 +48,11 @@ export default function Home() {
             return_url: "https://app.example.local/app2",
           });
 
-          window.location.href = `https://auth.example.local/auth/signout?${params}`;
+          if (sessions[0]?.idToken) {
+            params.set("id_token_hint", sessions[0].idToken);
+          }
+
+          window.location.href = `https://auth.example.local/auth/signout/zitadel?${params}`;
         }}
       >
         Logout

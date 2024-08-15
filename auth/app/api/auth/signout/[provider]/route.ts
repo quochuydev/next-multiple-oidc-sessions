@@ -6,7 +6,10 @@ import { Prisma } from "@prisma/client";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { provider: "portal" | "zitadel" } }
+) {
   try {
     const body = (await request.json()) as {
       returnUrl?: string;
@@ -17,12 +20,11 @@ export async function POST(request: NextRequest) {
     };
     const { returnUrl, idTokenHint, state } = body;
 
-    const requestCookie = cookies();
-    const authSessionCookie = requestCookie.get(authSessionCookieName);
-    const authSession = authSessionCookie?.value;
+    const provider = params.provider;
+    if (!provider) throw new Error("provider not found");
 
     const wellKnownResponse = await fetch(
-      `${configuration.portal.issuer}/.well-known/openid-configuration`
+      `${configuration[provider].issuer}/.well-known/openid-configuration`
     );
 
     const wellKnown = (await wellKnownResponse.json()) as {
@@ -37,28 +39,33 @@ export async function POST(request: NextRequest) {
       throw { code: wellKnownResponse.status, details: wellKnown };
     }
 
-    const params = new URLSearchParams({
-      client_id: configuration.portal.clientId,
+    const requestParams = new URLSearchParams({
+      client_id: configuration[provider].clientId,
       post_logout_redirect_uri: configuration.postLogoutRedirectUri,
     });
 
-    if (state) params.set("state", state);
+    if (state) requestParams.set("state", state);
+    if (idTokenHint) requestParams.set("id_token_hint", idTokenHint);
 
-    const sessionWhereInput: Prisma.SessionWhereInput = {
-      authSession: authSessionCookie?.value,
-    };
+    const requestCookie = cookies();
+    const authSessionCookie = requestCookie.get(authSessionCookieName);
 
-    if (idTokenHint) {
-      params.set("id_token_hint", idTokenHint);
-      sessionWhereInput.idToken = idTokenHint;
+    if (authSessionCookie?.value) {
+      const sessionWhereInput: Prisma.SessionWhereInput = {
+        authSession: authSessionCookie.value,
+      };
+
+      if (idTokenHint) {
+        sessionWhereInput.idToken = idTokenHint;
+      }
+
+      await prisma.session.updateMany({
+        where: sessionWhereInput,
+        data: {
+          deletedAt: new Date(),
+        },
+      });
     }
-
-    await prisma.session.updateMany({
-      where: sessionWhereInput,
-      data: {
-        deletedAt: new Date(),
-      },
-    });
 
     if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
 

@@ -2,6 +2,7 @@ import SignOut from "@/ui/SignOut";
 
 export default async function Page({
   searchParams,
+  params,
 }: {
   searchParams: {
     return_url?: string;
@@ -10,9 +11,12 @@ export default async function Page({
     post_logoutRedirect_uri?: string;
     state?: string;
   };
+  params: { provider: string };
 }) {
+  console.log(`debug:params`, params);
   return (
     <SignOut
+      provider={params.provider}
       returnUrl={searchParams.return_url}
       idTokenHint={searchParams.id_token_hint}
       clientId={searchParams.client_id}
