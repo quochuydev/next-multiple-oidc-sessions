@@ -92,7 +92,7 @@ async function handler(
     await prisma.session.create({
       data: {
         authSession,
-        issuer: wellKnown.issuer,
+        providerId: provider,
         accessToken: result.access_token,
         tokenType: result.token_type,
         expiresIn: result.expires_in,

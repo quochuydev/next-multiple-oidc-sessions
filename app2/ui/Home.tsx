@@ -48,11 +48,11 @@ export default function Home() {
             return_url: "https://app.example.local/app2",
           });
 
-          if (sessions[0]?.idToken) {
-            params.set("id_token_hint", sessions[0].idToken);
+          if (sessions[0]?.id) {
+            params.set("session_id", sessions[0].id);
           }
 
-          window.location.href = `https://auth.example.local/auth/signout/portal?${params}`;
+          window.location.href = `https://auth.example.local/auth/signout/?${params}`;
         }}
       >
         Logout

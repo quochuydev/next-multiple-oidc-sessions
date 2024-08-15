@@ -2,7 +2,7 @@
 CREATE TABLE "Session" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "authSession" TEXT NOT NULL,
-    "issuer" TEXT NOT NULL,
+    "providerId" TEXT NOT NULL,
     "accessToken" TEXT NOT NULL,
     "tokenType" TEXT NOT NULL,
     "expiresIn" INTEGER NOT NULL,

@@ -105,11 +105,11 @@ export default function ProfileImage(props: {
                     return_url: "https://app.example.local/app1",
                   });
 
-                  if (session?.idToken) {
-                    params.set("id_token_hint", session.idToken);
+                  if (session?.id) {
+                    params.set("session_id", session.id);
                   }
 
-                  window.location.href = `https://auth.example.local/auth/signout/zitadel?${params}`;
+                  window.location.href = `https://auth.example.local/auth/signout?${params}`;
                 }}
               >
                 Logout

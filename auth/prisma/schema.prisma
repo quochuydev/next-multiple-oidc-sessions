@@ -10,7 +10,7 @@ generator client {
 model Session {
     id           String    @id @default(uuid())
     authSession  String
-    issuer       String
+    providerId   String
     accessToken  String
     tokenType    String
     expiresIn    Int //miliseconds

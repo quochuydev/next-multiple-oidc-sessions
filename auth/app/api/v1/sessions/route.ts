@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         sessions: sessions.map((session) => ({
           id: session.id,
           authSession: session.authSession,
-          issuer: session.issuer,
+          providerId: session.providerId,
           tokenType: session.tokenType,
           accessToken: session.accessToken,
           expiresIn: session.expiresIn,
