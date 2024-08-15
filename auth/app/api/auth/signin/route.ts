@@ -52,17 +52,7 @@ export async function POST(request: NextRequest) {
   const codeChallenge = generateCodeChallenge(codeVerifier);
   const state = generateState();
 
-  const params: {
-    code_challenge: string;
-    code_challenge_method: string;
-    client_id: string;
-    redirect_uri: string;
-    response_type: string;
-    scope: string;
-    state: string;
-    prompt?: string;
-    login_hint?: string;
-  } = {
+  const params = new URLSearchParams({
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
     client_id: configuration.portal.clientId,
@@ -70,14 +60,10 @@ export async function POST(request: NextRequest) {
     response_type: "code",
     scope,
     state,
-  };
+  });
 
-  if (prompt) params.prompt = prompt;
-  if (loginHint) params.login_hint = loginHint;
-
-  const authorizeUrl = `${
-    wellKnown.authorization_endpoint
-  }?${new URLSearchParams(params).toString()}`;
+  if (prompt) params.set("prompt", prompt);
+  if (loginHint) params.set("login_hint", loginHint);
 
   if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
   setShortLiveCookie(stateCookieName, state);
@@ -85,5 +71,6 @@ export async function POST(request: NextRequest) {
   setShortLiveCookie(codeVerifierCookieName, codeVerifier);
   deleteCookie(csrfTokenCookieName);
 
+  const authorizeUrl = `${wellKnown.authorization_endpoint}?${params}`;
   return NextResponse.json({ authorizeUrl });
 }

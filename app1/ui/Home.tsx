@@ -29,7 +29,7 @@ export default function Home() {
               session={sessions[0]}
               sessions={sessions}
               signOut={() => {
-                window.location.href = `https://auth.example.local/auth/signout?id_token_hint=${sessions[0].idToken}&return_url=https://app.example.local/app1/hello`;
+                window.location.href = `https://auth.example.local/auth/signout?id_token_hint=${sessions[0]?.idToken}&return_url=https://app.example.local/app1`;
               }}
             />
           </div>

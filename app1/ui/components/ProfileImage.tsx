@@ -91,7 +91,7 @@ export default function ProfileImage(props: {
                     return_url: "https://app.example.local/app1",
                   });
 
-                  window.location.href = `https://auth.example.local/auth/signin?${params.toString()}`;
+                  window.location.href = `https://auth.example.local/auth/signin?${params}`;
                 }}
               >
                 + Add other account

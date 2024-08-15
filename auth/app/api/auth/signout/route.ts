@@ -1,7 +1,9 @@
 import configuration from "@/configuration";
-import { returnUrlCookieName } from "@/lib/constant";
+import { authSessionCookieName, returnUrlCookieName } from "@/lib/constant";
 import { setShortLiveCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -14,6 +16,10 @@ export async function POST(request: NextRequest) {
       state?: string;
     };
     const { returnUrl, idTokenHint, state } = body;
+
+    const requestCookie = cookies();
+    const authSessionCookie = requestCookie.get(authSessionCookieName);
+    const authSession = authSessionCookie?.value;
 
     const wellKnownResponse = await fetch(
       `${configuration.portal.issuer}/.well-known/openid-configuration`
@@ -31,35 +37,32 @@ export async function POST(request: NextRequest) {
       throw { code: wellKnownResponse.status, details: wellKnown };
     }
 
-    const params: {
-      client_id?: string;
-      post_logout_redirect_uri?: string;
-      id_token_hint?: string;
-      state?: string;
-    } = {
+    const params = new URLSearchParams({
       client_id: configuration.portal.clientId,
       post_logout_redirect_uri: configuration.portal.postLogoutRedirectUri,
+    });
+
+    if (state) params.set("state", state);
+
+    const sessionWhereInput: Prisma.SessionWhereInput = {
+      authSession: authSessionCookie?.value,
     };
 
-    if (idTokenHint) params.id_token_hint = idTokenHint;
-    if (state) params.state = state;
-
     if (idTokenHint) {
-      await prisma.session.updateMany({
-        where: {
-          idToken: idTokenHint,
-        },
-        data: {
-          deletedAt: new Date(),
-        },
-      });
+      params.set("id_token_hint", idTokenHint);
+      sessionWhereInput.idToken = idTokenHint;
     }
 
-    const endSessionUrl = `${
-      wellKnown.end_session_endpoint
-    }?${new URLSearchParams(params).toString()}`;
+    await prisma.session.updateMany({
+      where: sessionWhereInput,
+      data: {
+        deletedAt: new Date(),
+      },
+    });
 
     if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
+
+    const endSessionUrl = `${wellKnown.end_session_endpoint}?${params}`;
 
     return NextResponse.json({ endSessionUrl });
   } catch (error: any) {

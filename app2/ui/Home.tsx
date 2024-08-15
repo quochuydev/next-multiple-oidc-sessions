@@ -37,7 +37,7 @@ export default function Home() {
             return_url: "https://app.example.local/app2",
           });
 
-          window.location.href = `https://auth.example.local/auth/signin?${params.toString()}`;
+          window.location.href = `https://auth.example.local/auth/signin?${params}`;
         }}
       >
         Login
@@ -48,7 +48,7 @@ export default function Home() {
             return_url: "https://app.example.local/app2",
           });
 
-          window.location.href = `https://auth.example.local/auth/signout?${params.toString()}`;
+          window.location.href = `https://auth.example.local/auth/signout?${params}`;
         }}
       >
         Logout
