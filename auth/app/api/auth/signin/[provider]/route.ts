@@ -12,6 +12,7 @@ import {
   stateCookieName,
 } from "@/lib/constant";
 import { deleteCookie, setShortLiveCookie } from "@/lib/cookie";
+import { getWellKnown } from "@/lib/zitadel";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { URLSearchParams } from "url";
@@ -38,21 +39,7 @@ export async function POST(
   if (!csrfTokenCookie) throw new Error("csrfToken cookie not found");
   if (csrfTokenCookie.value !== csrfToken) throw new Error("Invalid csrfToken");
 
-  const wellKnownResponse = await fetch(
-    `${configuration[provider].issuer}/.well-known/openid-configuration`
-  );
-
-  const wellKnown = (await wellKnownResponse.json()) as {
-    issuer: string;
-    authorization_endpoint: string;
-    token_endpoint: string;
-    userinfo_endpoint: string;
-    end_session_endpoint: string;
-  };
-
-  if (wellKnownResponse.status !== 200) {
-    throw { code: wellKnownResponse.status, details: wellKnown };
-  }
+  const wellKnown = await getWellKnown(configuration[provider].issuer);
 
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);

@@ -2,6 +2,7 @@ import configuration from "@/configuration";
 import { authSessionCookieName, returnUrlCookieName } from "@/lib/constant";
 import { setShortLiveCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
+import { getWellKnown } from "@/lib/zitadel";
 import { Prisma } from "@prisma/client";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -23,21 +24,7 @@ export async function POST(
     const provider = params.provider;
     if (!provider) throw new Error("provider not found");
 
-    const wellKnownResponse = await fetch(
-      `${configuration[provider].issuer}/.well-known/openid-configuration`
-    );
-
-    const wellKnown = (await wellKnownResponse.json()) as {
-      issuer: string;
-      authorization_endpoint: string;
-      token_endpoint: string;
-      userinfo_endpoint: string;
-      end_session_endpoint: string;
-    };
-
-    if (wellKnownResponse.status !== 200) {
-      throw { code: wellKnownResponse.status, details: wellKnown };
-    }
+    const wellKnown = await getWellKnown(configuration[provider].issuer);
 
     const requestParams = new URLSearchParams({
       client_id: configuration[provider].clientId,

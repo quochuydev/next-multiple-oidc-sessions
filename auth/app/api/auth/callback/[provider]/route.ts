@@ -8,6 +8,7 @@ import {
 } from "@/lib/constant";
 import { deleteCookie, setAuthSessionCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
+import { getWellKnown } from "@/lib/zitadel";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -48,21 +49,7 @@ async function handler(
     tokenParams.append("redirect_uri", configuration[provider].redirectUrl);
     tokenParams.append("code_verifier", codeVerifierCookie.value);
 
-    const wellKnownResponse = await fetch(
-      `${configuration[provider].issuer}/.well-known/openid-configuration`
-    );
-
-    const wellKnown = (await wellKnownResponse.json()) as {
-      issuer: string;
-      authorization_endpoint: string;
-      token_endpoint: string;
-      userinfo_endpoint: string;
-      end_session_endpoint: string;
-    };
-
-    if (wellKnownResponse.status !== 200) {
-      throw { code: wellKnownResponse.status, details: wellKnown };
-    }
+    const wellKnown = await getWellKnown(configuration[provider].issuer);
 
     const response = await fetch(wellKnown.token_endpoint, {
       method: "post",
