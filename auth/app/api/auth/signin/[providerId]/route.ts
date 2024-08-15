@@ -1,4 +1,3 @@
-import configuration from "@/configuration";
 import {
   generateCodeChallenge,
   generateCodeVerifier,
@@ -46,7 +45,13 @@ export async function POST(
   const codeChallenge = generateCodeChallenge(codeVerifier);
   const state = generateState();
 
-  const requestParams = new URLSearchParams({
+  if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
+  setShortLiveCookie(stateCookieName, state);
+  setShortLiveCookie(redirectUrlCookieName, provider.redirectUrl);
+  setShortLiveCookie(codeVerifierCookieName, codeVerifier);
+  deleteCookie(csrfTokenCookieName);
+
+  const params = new URLSearchParams({
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
     client_id: provider.clientId,
@@ -56,15 +61,9 @@ export async function POST(
     state,
   });
 
-  if (prompt) requestParams.set("prompt", prompt);
-  if (loginHint) requestParams.set("login_hint", loginHint);
+  if (prompt) params.set("prompt", prompt);
+  if (loginHint) params.set("login_hint", loginHint);
 
-  if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
-  setShortLiveCookie(stateCookieName, state);
-  setShortLiveCookie(redirectUrlCookieName, provider.redirectUrl);
-  setShortLiveCookie(codeVerifierCookieName, codeVerifier);
-  deleteCookie(csrfTokenCookieName);
-
-  const authorizeUrl = `${wellKnown.authorization_endpoint}?${requestParams}`;
+  const authorizeUrl = `${wellKnown.authorization_endpoint}?${params}`;
   return NextResponse.json({ authorizeUrl });
 }

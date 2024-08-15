@@ -33,13 +33,13 @@ export async function POST(request: NextRequest) {
 
     const wellKnown = await getWellKnown(provider.wellKnown);
 
-    const requestParams = new URLSearchParams({
+    const params = new URLSearchParams({
       client_id: provider.clientId,
       post_logout_redirect_uri: configuration.postLogoutRedirectUri,
     });
 
     if (session.idToken) {
-      requestParams.set("id_token_hint", session.idToken);
+      params.set("id_token_hint", session.idToken);
     }
 
     await prisma.session.updateMany({
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
 
-    const endSessionUrl = `${wellKnown.end_session_endpoint}?${requestParams}`;
+    const endSessionUrl = `${wellKnown.end_session_endpoint}?${params}`;
     return NextResponse.json({ endSessionUrl });
   } catch (error: any) {
     return NextResponse.json(error.details || { message: error.message }, {
