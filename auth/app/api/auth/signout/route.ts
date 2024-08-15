@@ -3,6 +3,7 @@ import { authSessionCookieName, returnUrlCookieName } from "@/lib/constant";
 import { setShortLiveCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
 import { getWellKnown } from "@/lib/zitadel";
+import { authOptions } from "@/options";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -24,12 +25,15 @@ export async function POST(request: NextRequest) {
       },
     });
     if (!session) throw new Error("session not found");
-    const provider = session.providerId as "portal" | "zitadel";
 
-    const wellKnown = await getWellKnown(configuration[provider].issuer);
+    const providerId = session.providerId as "portal" | "zitadel";
+    const provider = authOptions.providers.find((p) => p.id === providerId);
+    if (!provider) throw new Error("provider not found");
+
+    const wellKnown = await getWellKnown(provider.wellKnown);
 
     const requestParams = new URLSearchParams({
-      client_id: configuration[provider].clientId,
+      client_id: provider.clientId,
       post_logout_redirect_uri: configuration.postLogoutRedirectUri,
     });
 

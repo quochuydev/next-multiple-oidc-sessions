@@ -9,6 +9,7 @@ import {
 import { deleteCookie, setAuthSessionCookie } from "@/lib/cookie";
 import { prisma } from "@/lib/prisma";
 import { getWellKnown } from "@/lib/zitadel";
+import { authOptions } from "@/options";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,12 +18,13 @@ import { v4 as uuid } from "uuid";
 
 async function handler(
   request: NextRequest,
-  { params }: { params: { provider: "portal" | "zitadel" } }
+  { params: { providerId } }: { params: { providerId: "portal" | "zitadel" } }
 ) {
   try {
     const code = request.nextUrl.searchParams.get("code");
     const state = request.nextUrl.searchParams.get("state");
-    const provider = params.provider;
+
+    const provider = authOptions.providers.find((p) => p.id === providerId);
     if (!provider) throw new Error("provider not found");
 
     const requestCookie = cookies();
@@ -39,17 +41,17 @@ async function handler(
     if (stateCookie.value !== state) throw new Error("Invalid state");
 
     if (!redirectCookie) throw new Error("Redirect url cookie not found");
-    if (redirectCookie.value !== configuration[provider].redirectUrl)
+    if (redirectCookie.value !== provider.redirectUrl)
       throw new Error("Invalid redirect url");
 
     const tokenParams = new URLSearchParams();
     tokenParams.append("code", code as string);
     tokenParams.append("grant_type", "authorization_code");
-    tokenParams.append("client_id", configuration[provider].clientId);
-    tokenParams.append("redirect_uri", configuration[provider].redirectUrl);
+    tokenParams.append("client_id", provider.clientId);
+    tokenParams.append("redirect_uri", provider.redirectUrl);
     tokenParams.append("code_verifier", codeVerifierCookie.value);
 
-    const wellKnown = await getWellKnown(configuration[provider].issuer);
+    const wellKnown = await getWellKnown(provider.wellKnown);
 
     const response = await fetch(wellKnown.token_endpoint, {
       method: "post",
@@ -92,7 +94,7 @@ async function handler(
     await prisma.session.create({
       data: {
         authSession,
-        providerId: provider,
+        providerId,
         accessToken: result.access_token,
         tokenType: result.token_type,
         expiresIn: result.expires_in,

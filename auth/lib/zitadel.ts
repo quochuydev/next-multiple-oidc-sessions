@@ -1,7 +1,5 @@
-export async function getWellKnown(issuer: string) {
-  const wellKnownResponse = await fetch(
-    new URL(`/.well-known/openid-configuration`, issuer).toString()
-  );
+export async function getWellKnown(wellKnownUrl: string) {
+  const wellKnownResponse = await fetch(wellKnownUrl);
 
   const wellKnown = (await wellKnownResponse.json()) as {
     issuer: string;
