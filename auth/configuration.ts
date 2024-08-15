@@ -41,6 +41,7 @@ const configuration = {
     issuer: "https://system-v1-fpms4l.zitadel.cloud",
     clientId: "279716137237868517",
     redirectUrl: "https://auth.example.local/api/auth/callback",
+    postLogoutRedirectUri: "https://auth.example.local/auth/signedout",
   },
 };
 

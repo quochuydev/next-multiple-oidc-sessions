@@ -28,14 +28,8 @@ export default function Home() {
               onSelectAccount={(session) => console.log(session)}
               session={sessions[0]}
               sessions={sessions}
-              signOut={async (sessionId) => {
-                await fetch("https://auth.example.local/api/v1/signout", {
-                  method: "post",
-                  credentials: "include",
-                  body: JSON.stringify({ sessionId }),
-                }).then((response) => response.json());
-
-                reloadSessions();
+              signOut={() => {
+                window.location.href = `https://auth.example.local/auth/signout?id_token_hint=${sessions[0].idToken}&return_url=https://app.example.local/app1/hello`;
               }}
             />
           </div>
