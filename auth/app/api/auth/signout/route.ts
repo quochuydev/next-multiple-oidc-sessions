@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const params = new URLSearchParams({
       client_id: configuration.portal.clientId,
-      post_logout_redirect_uri: configuration.portal.postLogoutRedirectUri,
+      post_logout_redirect_uri: configuration.postLogoutRedirectUri,
     });
 
     if (state) params.set("state", state);

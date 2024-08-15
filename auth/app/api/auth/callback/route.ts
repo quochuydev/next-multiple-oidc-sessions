@@ -33,14 +33,14 @@ async function handler(request: NextRequest) {
     if (stateCookie.value !== state) throw new Error("Invalid state");
 
     if (!redirectCookie) throw new Error("Redirect url cookie not found");
-    if (redirectCookie.value !== configuration.portal.redirectUrl)
+    if (redirectCookie.value !== configuration.redirectUrl)
       throw new Error("Invalid redirect url");
 
     const tokenParams = new URLSearchParams();
     tokenParams.append("code", code as string);
     tokenParams.append("grant_type", "authorization_code");
     tokenParams.append("client_id", configuration.portal.clientId);
-    tokenParams.append("redirect_uri", configuration.portal.redirectUrl);
+    tokenParams.append("redirect_uri", configuration.redirectUrl);
     tokenParams.append("code_verifier", codeVerifierCookie.value);
 
     const wellKnownResponse = await fetch(
@@ -49,6 +49,7 @@ async function handler(request: NextRequest) {
 
     const wellKnown = (await wellKnownResponse.json()) as {
       issuer: string;
+      authorization_endpoint: string;
       token_endpoint: string;
       userinfo_endpoint: string;
       end_session_endpoint: string;

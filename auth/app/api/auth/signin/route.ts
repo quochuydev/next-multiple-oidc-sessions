@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
     client_id: configuration.portal.clientId,
-    redirect_uri: configuration.portal.redirectUrl,
+    redirect_uri: configuration.redirectUrl,
     response_type: "code",
     scope,
     state,
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
   if (returnUrl) setShortLiveCookie(returnUrlCookieName, returnUrl);
   setShortLiveCookie(stateCookieName, state);
-  setShortLiveCookie(redirectUrlCookieName, configuration.portal.redirectUrl);
+  setShortLiveCookie(redirectUrlCookieName, configuration.redirectUrl);
   setShortLiveCookie(codeVerifierCookieName, codeVerifier);
   deleteCookie(csrfTokenCookieName);
 
