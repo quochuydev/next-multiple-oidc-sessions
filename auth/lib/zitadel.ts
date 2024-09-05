@@ -5,8 +5,12 @@ export async function getWellKnown(wellKnownUrl: string) {
     issuer: string;
     authorization_endpoint: string;
     token_endpoint: string;
+    introspection_endpoint: string;
     userinfo_endpoint: string;
+    revocation_endpoint: string;
     end_session_endpoint: string;
+    device_authorization_endpoint: string;
+    jwks_uri: string;
   };
 
   if (wellKnownResponse.status !== 200) {
